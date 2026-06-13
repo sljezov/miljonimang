@@ -115,3 +115,62 @@ Täielik prompt: `prompts/question-generation.md`
 - Automaatne küsimuste genereerimine (API võtmega)
 - Mänguajalugu
 - Ülesannete lisamine veebiliidesest
+
+## Development process
+
+The app was built in incremental iterations tracked via git commits:
+
+1. Project scaffolding (package.json, .gitignore)
+2. Example assignments added to `input/`
+3. Sync script for reading input files
+4. HTML templates for all views
+5. CSS layout and styling
+6. Task list and detail views
+7. Core game engine (questions, answers, scoring)
+8. Three lifelines (50:50, hint, audience)
+9. AI prompt documentation
+10. AI-generated question banks added to `public/data/`
+11. Random question selection and full result screen
+12. README
+
+Questions were generated using the prompt in `prompts/question-generation.md`, copied into Claude, and the JSON output was added to each `data.json` file.
+
+## Definition of Done
+
+A feature is considered done when:
+- It works in a modern browser without console errors
+- The full game flow works end-to-end with the feature in place
+- Edge cases are handled (empty question bank, missing files, etc.)
+- The change is committed with a descriptive message
+
+## Testing
+
+Manual testing was done against the acceptance criteria of each user story:
+
+| Scenario | Expected | Result |
+|---|---|---|
+| Select assignment → start game → answer 15 correctly | Win screen, 1 000 000 pts | Pass |
+| Answer incorrectly on Q3 | Game ends, score drops to 0 (no safe level reached) | Pass |
+| Answer incorrectly on Q7 | Game ends, score drops to 1 000 (Q5 safe level) | Pass |
+| Use 50:50 | Two wrong options removed, cannot reuse lifeline | Pass |
+| Use hint | Hint text shown, cannot reuse lifeline | Pass |
+| Use audience vote | Simulated poll shown, skewed toward correct answer | Pass |
+| Quit mid-game | Result shows score at current level | Pass |
+| Play again | Different question selected per level where possible | Pass |
+| Add new folder to `input/`, run `npm run sync` | New assignment appears in list | Pass |
+
+## Retrospective
+
+**What went well**
+- Static-first approach (no backend, no API key needed) makes the app trivial to host on GitHub Pages
+- Pre-generating questions with AI keeps the app fast and the question quality high
+- The sync script cleanly separates source files (`input/`) from served files (`public/data/`)
+
+**What was challenging**
+- Keeping AI-generated questions at the right difficulty — some level 11–15 questions needed manual adjustment
+- Designing the audience vote so it feels realistic without always being correct
+
+**What to improve next**
+- Add real-time AI question generation via API so teachers don't need a manual copy-paste step
+- Save results to `localStorage` for a game history view
+- Mobile layout below 880 px needs a dedicated design pass
