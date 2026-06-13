@@ -1,0 +1,12 @@
+{
+  "assignments": [
+    {
+      "id": "001",
+      "name": "JavaScripti kalkulaator"
+    },
+    {
+      "id": "002",
+      "name": "To-do nimekiri localStorage-ga"
+    }
+  ]
+}

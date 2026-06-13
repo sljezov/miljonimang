@@ -1,0 +1,604 @@
+{
+  "assignment": "# To-do nimekiri localStorage-ga\n\n## Ülesande kirjeldus\n\nLoo dünaamiline ülesannete nimekiri (to-do list), kus kasutaja saab lisada ja kustutada ülesandeid. Andmed peavad säilima ka pärast lehe uuesti laadimist, kasutades brauseri `localStorage`-i.\n\n## Nõuded\n\n- Kasutaja saab tekstivälja ja nupu abil lisada uusi ülesandeid\n- Iga ülesande kõrval on kustutamisnupp\n- Tühi ülesanne ei tohi lisanduda nimekirja\n- Andmed salvestatakse `localStorage`-i ja kõik ülesanded taastatakse lehe uuesti laadimisel\n- Lehe laadimisel loetakse olemasolevad ülesanded `localStorage`-ist ja kuvatakse need\n\n## Nõutud failid\n\n- `index.html` — rakenduse struktuur\n- `style.css` — kujundus\n- `app.js` — kõik loogika\n\n## Hindamiskriteeriumid\n\n- Ülesande lisamine toimib ja tühja sisestust ei lisata\n- Kustutamine eemaldab ülesande nii DOM-ist kui `localStorage`-st\n- Andmed säilivad lehe uuesti laadimisel\n- Ülesanded salvestatakse JSON-massiivina (`JSON.stringify` / `JSON.parse`)\n- Kood on struktureeritud: eraldi funktsioonid lisamiseks, kustutamiseks ja kuvamiseks",
+  "solutionFiles": [
+    {
+      "path": "app.js",
+      "content": "const STORAGE_KEY = 'todoItems';\n\nconst taskInput = document.getElementById('taskInput');\nconst addBtn = document.getElementById('addBtn');\nconst taskList = document.getElementById('taskList');\nconst emptyMsg = document.getElementById('emptyMsg');\n\nfunction loadTasks() {\n  const raw = localStorage.getItem(STORAGE_KEY);\n  return raw ? JSON.parse(raw) : [];\n}\n\nfunction saveTasks(tasks) {\n  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));\n}\n\nfunction renderTasks() {\n  const tasks = loadTasks();\n  taskList.innerHTML = '';\n  emptyMsg.hidden = tasks.length > 0;\n\n  tasks.forEach(function(task, index) {\n    const li = document.createElement('li');\n    li.textContent = task;\n\n    const deleteBtn = document.createElement('button');\n    deleteBtn.textContent = 'Kustuta';\n    deleteBtn.className = 'delete';\n    deleteBtn.addEventListener('click', function() {\n      deleteTask(index);\n    });\n\n    li.appendChild(deleteBtn);\n    taskList.appendChild(li);\n  });\n}\n\nfunction addTask() {\n  const text = taskInput.value.trim();\n  if (!text) return;\n\n  const tasks = loadTasks();\n  tasks.push(text);\n  saveTasks(tasks);\n  taskInput.value = '';\n  renderTasks();\n}\n\nfunction deleteTask(index) {\n  const tasks = loadTasks();\n  tasks.splice(index, 1);\n  saveTasks(tasks);\n  renderTasks();\n}\n\naddBtn.addEventListener('click', addTask);\n\ntaskInput.addEventListener('keydown', function(event) {\n  if (event.key === 'Enter') addTask();\n});\n\nrenderTasks();\n"
+    },
+    {
+      "path": "index.html",
+      "content": "<!DOCTYPE html>\n<html lang=\"et\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>To-do nimekiri</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <div class=\"container\">\n    <h1>Minu ülesanded</h1>\n    <div class=\"add-row\">\n      <input type=\"text\" id=\"taskInput\" placeholder=\"Lisa uus ülesanne...\">\n      <button id=\"addBtn\">Lisa</button>\n    </div>\n    <ul id=\"taskList\"></ul>\n    <p id=\"emptyMsg\" class=\"empty\">Nimekirjas pole ülesandeid.</p>\n  </div>\n  <script src=\"app.js\"></script>\n</body>\n</html>\n"
+    },
+    {
+      "path": "style.css",
+      "content": "* { box-sizing: border-box; margin: 0; padding: 0; }\n\nbody {\n  font-family: sans-serif;\n  background: #f5f5f5;\n  display: flex;\n  justify-content: center;\n  padding: 40px 16px;\n}\n\n.container {\n  background: white;\n  border-radius: 12px;\n  padding: 24px;\n  width: 100%;\n  max-width: 480px;\n  box-shadow: 0 4px 20px rgba(0,0,0,0.08);\n}\n\nh1 { font-size: 22px; margin-bottom: 16px; }\n\n.add-row { display: flex; gap: 8px; margin-bottom: 16px; }\n\ninput[type=\"text\"] {\n  flex: 1;\n  padding: 10px 12px;\n  border: 1px solid #ddd;\n  border-radius: 6px;\n  font-size: 15px;\n}\n\nbutton {\n  padding: 10px 16px;\n  border: none;\n  border-radius: 6px;\n  cursor: pointer;\n  font-size: 14px;\n}\n\n#addBtn { background: #4a90e2; color: white; }\n#addBtn:hover { background: #357abd; }\n\nul { list-style: none; display: flex; flex-direction: column; gap: 8px; }\n\nli {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 10px 14px;\n  background: #f9f9f9;\n  border-radius: 6px;\n  border: 1px solid #eee;\n}\n\n.delete { background: #ef5d5d; color: white; padding: 6px 10px; }\n.delete:hover { background: #d94444; }\n\n.empty { color: #aaa; font-size: 14px; margin-top: 12px; }\n"
+    }
+  ],
+  "questions": [
+    {
+      "level": 1,
+      "question": "Mis on to-do rakenduse peamine eesmärk?",
+      "options": [
+        "Ülesannete lisamine ja kustutamine",
+        "Arvude korrutamine",
+        "Piltide töötlemine",
+        "Ilmateate kuvamine"
+      ],
+      "correctIndex": 0,
+      "explanation": "Rakendus võimaldab kasutajal koostada ja hallata ülesannete nimekirja.",
+      "hint": "Vaata sisestusvälja, nuppu „Lisa“ ja ülesannete loendit."
+    },
+    {
+      "level": 1,
+      "question": "Mida saab kasutaja tekstiväljale sisestada?",
+      "options": [
+        "Uue ülesande teksti",
+        "Ainult parooli",
+        "CSS-värvi",
+        "Veebiaadressi, mida rakendus avab"
+      ],
+      "correctIndex": 0,
+      "explanation": "Tekstiväli taskInput on uue ülesande sisestamiseks.",
+      "hint": "Vaata välja kohatäidet „Lisa uus ülesanne...“."
+    },
+    {
+      "level": 1,
+      "question": "Mida teeb nupp „Lisa“?",
+      "options": [
+        "Lisab sisestatud ülesande nimekirja",
+        "Kustutab nimekirja",
+        "Sulgeb lehe",
+        "Muudab lehe tausta"
+      ],
+      "correctIndex": 0,
+      "explanation": "Lisa-nupu klõps kutsub addTask() funktsiooni.",
+      "hint": "Vaata addBtn click-kuulajat."
+    },
+    {
+      "level": 2,
+      "question": "Kus kuvatakse lisatud ülesanded?",
+      "options": [
+        "ul-elemendis id-ga taskList",
+        "Lehe pealkirjas",
+        "CSS-failis",
+        "Nupul „Lisa“"
+      ],
+      "correctIndex": 0,
+      "explanation": "HTML-is on ülesannete jaoks tühi ul-element id-ga taskList.",
+      "hint": "Otsi HTML-ist taskList elementi."
+    },
+    {
+      "level": 2,
+      "question": "Mida teeb iga ülesande kõrval olev nupp „Kustuta“?",
+      "options": [
+        "Eemaldab valitud ülesande",
+        "Lisab uue ülesande",
+        "Laadib lehe uuesti",
+        "Kopeerib ülesande"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kustutamisnupp kutsub deleteTask() funktsiooni vastava ülesande indeksiga.",
+      "hint": "Vaata kustutamisnupu click-kuulajat."
+    },
+    {
+      "level": 2,
+      "question": "Milline fail sisaldab rakenduse JavaScripti loogikat?",
+      "options": [
+        "index.html",
+        "style.css",
+        "app.js",
+        "assignment.md"
+      ],
+      "correctIndex": 2,
+      "explanation": "app.js sisaldab lisamise, kustutamise, salvestamise ja kuvamise funktsioone.",
+      "hint": "Millises failis on function addTask?"
+    },
+    {
+      "level": 3,
+      "question": "Mis juhtub ülesannetega pärast lehe uuesti laadimist?",
+      "options": [
+        "Need taastatakse localStorage-ist",
+        "Need kaovad alati",
+        "Need saadetakse e-postiga",
+        "Need muutuvad nuppudeks"
+      ],
+      "correctIndex": 0,
+      "explanation": "Ülesanded salvestatakse localStorage-i ning renderTasks() kuvab need lehe avamisel uuesti.",
+      "hint": "Vaata faili lõpus olevat renderTasks() kutset."
+    },
+    {
+      "level": 3,
+      "question": "Milleks kasutatakse emptyMsg elementi?",
+      "options": [
+        "Teate kuvamiseks, kui nimekirjas pole ülesandeid",
+        "Uue ülesande salvestamiseks",
+        "Kõigi ülesannete kustutamiseks",
+        "Lehe värvi muutmiseks"
+      ],
+      "correctIndex": 0,
+      "explanation": "emptyMsg sisaldab teksti „Nimekirjas pole ülesandeid“ ja seda näidatakse tühja loendi korral.",
+      "hint": "Vaata emptyMsg elemendi teksti HTML-is."
+    },
+    {
+      "level": 3,
+      "question": "Kuidas saab ülesande lisada ilma hiirega nuppu vajutamata?",
+      "options": [
+        "Vajutades sisestusväljal Enter-klahvi",
+        "Vajutades Escape-klahvi",
+        "Kerides lehte",
+        "Sulgedes brauseri"
+      ],
+      "correctIndex": 0,
+      "explanation": "taskInput kuulab keydown-sündmust ja Enter-klahv kutsub addTask() funktsiooni.",
+      "hint": "Otsi koodist event.key === \"Enter\"."
+    },
+    {
+      "level": 4,
+      "question": "Mis on localStorage roll selles rakenduses?",
+      "options": [
+        "Hoida ülesandeid brauseris alles",
+        "Kujundada kustutamisnuppu",
+        "Arvutada ülesannete arvu serveris",
+        "Avada uusi veebilehti"
+      ],
+      "correctIndex": 0,
+      "explanation": "localStorage võimaldab andmeid brauseris säilitada ka pärast lehe uuesti laadimist.",
+      "hint": "Miks on rakendusel loadTasks ja saveTasks funktsioonid?"
+    },
+    {
+      "level": 4,
+      "question": "Mis juhtub, kui kasutaja proovib lisada täiesti tühja ülesande?",
+      "options": [
+        "Ülesannet ei lisata",
+        "Lisatakse sõna „tühi“",
+        "Kõik varasemad ülesanded kustutatakse",
+        "Leht sulgub"
+      ],
+      "correctIndex": 0,
+      "explanation": "addTask() lõpetab töö, kui pärast trim() kasutamist pole teksti alles.",
+      "hint": "Vaata tingimust if (!text) return."
+    },
+    {
+      "level": 4,
+      "question": "Mis juhtub pärast ülesande edukat lisamist sisestusväljaga?",
+      "options": [
+        "See tühjendatakse",
+        "See peidetakse",
+        "See muutub kustutamisnupuks",
+        "Sinna jääb tekst alles"
+      ],
+      "correctIndex": 0,
+      "explanation": "Pärast salvestamist seatakse taskInput.value tühjaks.",
+      "hint": "Vaata addTask() funktsiooni lõpuosa."
+    },
+    {
+      "level": 5,
+      "question": "Mida teeb addTask() funktsioon?",
+      "options": [
+        "Kontrollib teksti, lisab ülesande, salvestab ja uuendab kuva",
+        "Muudab ainult CSS-i",
+        "Kustutab kõik ülesanded",
+        "Laeb andmed serverist"
+      ],
+      "correctIndex": 0,
+      "explanation": "addTask() loeb sisendi, eemaldab liigsed tühikud, lisab teksti massiivi, salvestab ja renderdab nimekirja.",
+      "hint": "Järgi addTask() samme ülevalt alla."
+    },
+    {
+      "level": 5,
+      "question": "Mida teeb deleteTask() funktsioon?",
+      "options": [
+        "Eemaldab valitud ülesande, salvestab muudatuse ja uuendab kuva",
+        "Lisab ülesande",
+        "Muudab ülesande värvi",
+        "Sulgeb brauseri"
+      ],
+      "correctIndex": 0,
+      "explanation": "deleteTask() eemaldab massiivist ühe kirje splice abil, salvestab massiivi ja kutsub renderTasks().",
+      "hint": "Vaata deleteTask() kolme põhietappi."
+    },
+    {
+      "level": 5,
+      "question": "Mida teeb renderTasks() funktsioon?",
+      "options": [
+        "Loeb ülesanded ja joonistab nimekirja ekraanile",
+        "Salvestab ainult ühe ülesande",
+        "Kustutab JavaScripti faili",
+        "Muudab localStorage-i CSS-iks"
+      ],
+      "correctIndex": 0,
+      "explanation": "renderTasks() loeb andmed, puhastab vana loendi ja loob iga ülesande jaoks li-elemendi.",
+      "hint": "Milline funktsioon loob li- ja button-elemendid?"
+    },
+    {
+      "level": 6,
+      "question": "Miks kasutatakse taskInput.value.trim()?",
+      "options": [
+        "Et eemaldada teksti algusest ja lõpust tühikud",
+        "Et muuta tekst numbriks",
+        "Et salvestada tekst serverisse",
+        "Et sortida ülesanded"
+      ],
+      "correctIndex": 0,
+      "explanation": "trim eemaldab liigsed tühikud ja aitab vältida ainult tühikutest koosneva ülesande lisamist.",
+      "hint": "Mis jääb alles väärtusest \"   \" pärast trim() kasutamist?"
+    },
+    {
+      "level": 6,
+      "question": "Miks kontrollitakse if (!text) return?",
+      "options": [
+        "Et tühja teksti korral funktsioon lõpetada",
+        "Et kõik ülesanded kustutada",
+        "Et leht uuesti laadida",
+        "Et tekst suurtähtedeks muuta"
+      ],
+      "correctIndex": 0,
+      "explanation": "Tühi string on falsy-väärtus. return peatab lisamise enne massiivi muutmist.",
+      "hint": "Mis peaks juhtuma, kui kasutaja ei kirjutanud midagi?"
+    },
+    {
+      "level": 6,
+      "question": "Miks kutsutakse pärast lisamist renderTasks() funktsiooni?",
+      "options": [
+        "Et uus salvestatud ülesanne kohe ekraanile ilmuks",
+        "Et localStorage kustutada",
+        "Et HTML-fail sulgeda",
+        "Et sisestusväli numbriks muuta"
+      ],
+      "correctIndex": 0,
+      "explanation": "Andmete muutmise järel tuleb kasutajaliides uuesti joonistada.",
+      "hint": "Kuidas saab kasutaja näha äsja lisatud ülesannet?"
+    },
+    {
+      "level": 7,
+      "question": "Miks kasutatakse enne salvestamist JSON.stringify() meetodit?",
+      "options": [
+        "Et muuta ülesannete massiiv localStorage-i jaoks stringiks",
+        "Et muuta tekst HTML-iks",
+        "Et kustutada duplikaadid",
+        "Et lisada CSS-klass"
+      ],
+      "correctIndex": 0,
+      "explanation": "localStorage salvestab stringe. JSON.stringify muudab JavaScripti massiivi JSON-stringiks.",
+      "hint": "Millist tüüpi väärtusi localStorage salvestab?"
+    },
+    {
+      "level": 7,
+      "question": "Mida teeb JSON.parse() ülesannete laadimisel?",
+      "options": [
+        "Muudab salvestatud JSON-stringi tagasi massiiviks",
+        "Kustutab localStorage-i",
+        "Loob HTML-nupu",
+        "Muudab teksti värvi"
+      ],
+      "correctIndex": 0,
+      "explanation": "JSON.parse taastab salvestatud stringist JavaScripti massiivi.",
+      "hint": "See on JSON.stringify vastupidine tegevus."
+    },
+    {
+      "level": 7,
+      "question": "Miks tagastab loadTasks() puuduva salvestuse korral tühja massiivi?",
+      "options": [
+        "Et rakendus saaks alustada tühja nimekirjaga",
+        "Et leht näitaks viga",
+        "Et lisamisnupp peita",
+        "Et luua automaatselt näidisülesanne"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kui localStorage-is pole veel todoItems võtit, pole ülesandeid. Tühi massiiv võimaldab rakendusel tavaliselt jätkata.",
+      "hint": "Mis peaks olema esmakordsel avamisel ülesannete loendis?"
+    },
+    {
+      "level": 8,
+      "question": "Miks tühjendab renderTasks() enne kuvamist taskList elemendi?",
+      "options": [
+        "Et vanu ridu uuesti lisades ei tekiks duplikaate",
+        "Et localStorage kustutada",
+        "Et kõik nupud keelata",
+        "Et sisendvälja puhastada"
+      ],
+      "correctIndex": 0,
+      "explanation": "renderTasks() loob kogu loendi uuesti. Vana DOM-i eemaldamata kuvataks samad ülesanded mitu korda.",
+      "hint": "Mis juhtuks, kui uued li-elemendid lisataks alati vanade lõppu?"
+    },
+    {
+      "level": 8,
+      "question": "Kuidas otsustab renderTasks(), kas tühja nimekirja teadet näidata?",
+      "options": [
+        "Kontrollib tasks.length väärtust",
+        "Kontrollib CSS-faili pikkust",
+        "Küsib serverilt",
+        "Vaatab sisestusvälja värvi"
+      ],
+      "correctIndex": 0,
+      "explanation": "emptyMsg.hidden sõltub sellest, kas ülesannete massiivis on elemente.",
+      "hint": "Millal on tasks.length suurem kui null?"
+    },
+    {
+      "level": 8,
+      "question": "Miks kasutatakse ülesande teksti kuvamisel textContent omadust?",
+      "options": [
+        "Et sisestatud tekst kuvataks tekstina, mitte HTML-ina",
+        "Et ülesanne automaatselt salvestada",
+        "Et nupp suuremaks muuta",
+        "Et ülesanded sortida"
+      ],
+      "correctIndex": 0,
+      "explanation": "textContent ei tõlgenda kasutaja sisestatud HTML-märgendeid ja on seetõttu turvalisem.",
+      "hint": "Kas kasutaja sisestatud märgendeid peaks käivitama?"
+    },
+    {
+      "level": 9,
+      "question": "Mida teeb tasks.splice(index, 1)?",
+      "options": [
+        "Eemaldab massiivist ühe ülesande antud indeksilt",
+        "Lisab massiivi ühe ülesande",
+        "Kopeerib kogu massiivi",
+        "Muudab ülesande tekstiks"
+      ],
+      "correctIndex": 0,
+      "explanation": "splice(index, 1) eemaldab massiivist ühe elemendi valitud asukohalt.",
+      "hint": "Mida tähendab splice teine argument 1?"
+    },
+    {
+      "level": 9,
+      "question": "Kuidas teab kustutamisnupp, milline ülesanne eemaldada?",
+      "options": [
+        "Kuulaja annab deleteTask() funktsioonile selle ülesande indeksi",
+        "Nupu värvi järgi",
+        "localStorage valib juhuslikult",
+        "Ülesande teksti pikkuse järgi"
+      ],
+      "correctIndex": 0,
+      "explanation": "forEach annab igale ülesandele indeksi. Vastava nupu kuulaja kutsub deleteTask(index).",
+      "hint": "Jälgi index väärtust forEach funktsioonist kustutamiseni."
+    },
+    {
+      "level": 9,
+      "question": "Miks salvestatakse massiiv pärast splice() kasutamist uuesti?",
+      "options": [
+        "Et kustutatud ülesanne ei tuleks lehe laadimisel tagasi",
+        "Et CSS uueneks",
+        "Et sisestusväli tühjeneks",
+        "Et lisamisnupp töötaks"
+      ],
+      "correctIndex": 0,
+      "explanation": "splice muudab mälus olevat massiivi. saveTasks kirjutab uue seisu localStorage-i.",
+      "hint": "Mis juhtuks, kui muuta ainult mälus olevat massiivi?"
+    },
+    {
+      "level": 10,
+      "question": "Millises järjekorras liiguvad andmed ülesande lisamisel?",
+      "options": [
+        "Sisestus → trim → massiiv → JSON → localStorage → DOM",
+        "DOM → CSS → server → sisestus",
+        "localStorage → nupp → CSS → JSON",
+        "Kustutamine → sisestus → HTML"
+      ],
+      "correctIndex": 0,
+      "explanation": "addTask() loeb ja puhastab teksti, lisab selle massiivi, salvestab massiivi ning renderdab uue kuva.",
+      "hint": "Järgi addTask() ja renderTasks() kutseid."
+    },
+    {
+      "level": 10,
+      "question": "Millises järjekorras toimub ülesande kustutamine?",
+      "options": [
+        "Laadimine → massiivist eemaldamine → salvestamine → kuva uuendamine",
+        "Kuva uuendamine → CSS → sisestamine",
+        "Salvestamine → uue ülesande lisamine → kustutamine",
+        "HTML-i sulgemine → localStorage"
+      ],
+      "correctIndex": 0,
+      "explanation": "deleteTask() loeb massiivi, eemaldab valitud elemendi, salvestab uue seisu ja renderdab loendi.",
+      "hint": "Vaata deleteTask() ridu ülevalt alla."
+    },
+    {
+      "level": 10,
+      "question": "Miks on loadTasks(), saveTasks() ja renderTasks() eraldi funktsioonid?",
+      "options": [
+        "Igal funktsioonil on selge ülesanne ning sama loogikat saab korduvalt kasutada",
+        "JavaScript lubab funktsioonis ainult üht rida",
+        "CSS nõuab kolme funktsiooni",
+        "localStorage loob need automaatselt"
+      ],
+      "correctIndex": 0,
+      "explanation": "Üks funktsioon loeb, teine salvestab ja kolmas kuvab. See muudab koodi arusaadavamaks ning vähendab kordamist.",
+      "hint": "Millist erinevat tööd teeb iga neist kolmest funktsioonist?"
+    },
+    {
+      "level": 11,
+      "question": "Mis teeb ülesanded pärast lehe uuesti laadimist uuesti nähtavaks?",
+      "options": [
+        "HTML jätab vana DOM-i alati meelde",
+        "renderTasks() loeb andmed localStorage-ist ja loob loendi uuesti",
+        "CSS salvestab ülesannete teksti",
+        "Nupp Lisa taastab andmed automaatselt"
+      ],
+      "correctIndex": 1,
+      "explanation": "Lehe lõpus kutsutakse renderTasks(). See kasutab loadTasks() funktsiooni, loeb salvestatud massiivi ja loob iga ülesande jaoks uue li-elemendi.",
+      "hint": "Vaata, milline funktsioon kutsutakse faili lõpus."
+    },
+    {
+      "level": 11,
+      "question": "Miks võib vigane väärtus localStorage-is rakenduse töö katkestada?",
+      "options": [
+        "JSON.parse võib vigase JSON-i korral vea visata",
+        "localStorage muudab kõik väärtused nulliks",
+        "createElement ei tööta JSON-iga",
+        "CSS ei leia STORAGE_KEY väärtust"
+      ],
+      "correctIndex": 0,
+      "explanation": "loadTasks() kutsub JSON.parse() ilma try/catch veakäitluseta. Kui salvestatud tekst pole korrektne JSON, visatakse viga ja renderdamine katkeb.",
+      "hint": "Mis juhtub, kui JSON.parse saab teksti, mis ei ole korrektne JSON?"
+    },
+    {
+      "level": 11,
+      "question": "Mis juhtub, kui lisada kaks ühesuguse tekstiga ülesannet?",
+      "options": [
+        "Teist ülesannet ei lisata",
+        "Mõlemad lisatakse eraldi kirjetena",
+        "Esimene kirjutatakse automaatselt üle",
+        "Rakendus kustutab mõlemad"
+      ],
+      "correctIndex": 1,
+      "explanation": "addTask() ei kontrolli, kas sama tekst on juba massiivis. Seetõttu lisatakse mõlemad kirjed ja neid saab indeksi järgi eraldi kustutada.",
+      "hint": "Kas addTask() funktsioonis on duplikaatide kontroll?"
+    },
+    {
+      "level": 12,
+      "question": "Miks on loadTasks() ja saveTasks() eraldi funktsioonid?",
+      "options": [
+        "Et sama lugemis- ja salvestusloogikat saaks kasutada mitmes kohas",
+        "Sest localStorage töötab ainult eraldi funktsioonides",
+        "Et CSS saaks neid funktsioone kutsuda",
+        "Et ülesandeid automaatselt sortida"
+      ],
+      "correctIndex": 0,
+      "explanation": "Eraldi funktsioonid väldivad sama koodi kordamist. Kui salvestusviisi tuleb muuta, saab muudatuse teha ühes kohas.",
+      "hint": "Mitmes kohas on vaja ülesandeid laadida või salvestada?"
+    },
+    {
+      "level": 12,
+      "question": "Miks kutsutakse renderTasks() nii lisamise kui kustutamise järel?",
+      "options": [
+        "Et ekraan vastaks alati salvestatud andmete uuele seisule",
+        "Et leht uuesti laadida",
+        "Et localStorage tühjendada",
+        "Et nupu värvi muuta"
+      ],
+      "correctIndex": 0,
+      "explanation": "Pärast andmete muutmist tuleb kasutajaliides uuesti joonistada. Nii näeb kasutaja kohe lisatud või kustutatud ülesannet.",
+      "hint": "Mis peab ekraanil juhtuma pärast andmete muutmist?"
+    },
+    {
+      "level": 12,
+      "question": "Miks kasutatakse localStorage-i võtme jaoks STORAGE_KEY konstanti?",
+      "options": [
+        "Et võtme nimi oleks ühes kohas ja kirjavigu tekiks vähem",
+        "Et localStorage mahutaks rohkem andmeid",
+        "Et muuta ülesanded numbriteks",
+        "Et brauser valiks võtme juhuslikult"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kui võtme nimi on konstandis, kasutatakse lugemisel ja salvestamisel kindlasti sama väärtust. Võtme muutmiseks piisab ühest kohast.",
+      "hint": "Mis juhtuks, kui lugemisel ja salvestamisel oleks võtmes erinev kirjapilt?"
+    },
+    {
+      "level": 13,
+      "question": "Kuidas saaks kasutajale näidata, miks tühja ülesannet ei lisatud?",
+      "options": [
+        "Kuvada sisestusvälja juures veateade enne return-i",
+        "Sulgeda veebileht",
+        "Lisada tühi ülesanne ikkagi",
+        "Kustutada kõik varasemad ülesanded"
+      ],
+      "correctIndex": 0,
+      "explanation": "Praegu lõpetab if (!text) return funktsiooni vaikselt. Enne lõpetamist võiks kuvada selge teate, et ülesande tekst on kohustuslik.",
+      "hint": "Praegu ei muutu tühja sisendi korral ekraanil midagi. Kuidas kasutaja põhjusest teada saaks?"
+    },
+    {
+      "level": 13,
+      "question": "Mis probleem võib tekkida väga pika ülesande teksti korral?",
+      "options": [
+        "Tekst võib rikkuda paigutust või muuta loendi raskesti loetavaks",
+        "JavaScript muudab teksti automaatselt pildiks",
+        "localStorage kustutab kohe kogu loendi",
+        "Kustutamisnupp muutub serveriks"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kood ei piira teksti pikkust. Väga pikk tekst võib muuta rea ebamugavalt suureks või paigutuse kitsal ekraanil halvasti loetavaks.",
+      "hint": "Kas sisestusväljal või addTask() funktsioonis on pikkuse piirang?"
+    },
+    {
+      "level": 13,
+      "question": "Kuidas vältida liiga pika ülesande lisamist?",
+      "options": [
+        "Kontrollida text.length väärtust ja kuvada piirangu ületamisel veateade",
+        "Kasutada JSON.parse kaks korda",
+        "Eemaldada taskInput element",
+        "Muuta kõik tähed numbriteks"
+      ],
+      "correctIndex": 0,
+      "explanation": "Enne tasks.push(text) kutset saab kontrollida teksti pikkust. Kui see ületab kokkulepitud piiri, ülesannet ei lisata ja kasutajale kuvatakse selgitus.",
+      "hint": "Millises addTask() kohas toimub juba tühja teksti kontroll?"
+    },
+    {
+      "level": 14,
+      "question": "Kuidas lisada võimalus märkida ülesanne tehtuks?",
+      "options": [
+        "Salvestada iga ülesanne objektina, millel on tekst ja done-väärtus",
+        "Muuta localStorage CSS-klassiks",
+        "Kustutada ülesanne kohe pärast lisamist",
+        "Asendada massiiv ühe stringiga"
+      ],
+      "correctIndex": 0,
+      "explanation": "Pelga stringi asemel võiks iga kirje olla näiteks { text: \"Õpi\", done: false }. Märkeruut muudaks done-väärtust ja renderTasks() kuvaks tehtud ülesande teise stiiliga.",
+      "hint": "Milline andmestruktuur saab hoida korraga nii teksti kui ka tehtud olekut?"
+    },
+    {
+      "level": 14,
+      "question": "Kuidas muuta localStorage-i lugemine vigase JSON-i korral töökindlamaks?",
+      "options": [
+        "Panna JSON.parse try/catch plokki ja vea korral tagastada tühi massiiv",
+        "Kutsuda renderTasks() lõputult",
+        "Peita taskList CSS-iga",
+        "Asendada JSON HTML-iga"
+      ],
+      "correctIndex": 0,
+      "explanation": "try/catch võimaldab JSON.parse vea kinni püüda. Rakendus saab seejärel kasutada tühja massiivi või kuvada kasutajale veateate, selle asemel et täielikult katkeda.",
+      "hint": "Millise JavaScripti konstruktsiooniga saab võimaliku vea kinni püüda?"
+    },
+    {
+      "level": 14,
+      "question": "Kuidas lisada nupp „Kustuta kõik“?",
+      "options": [
+        "Salvestada tühi massiiv ja kutsuda renderTasks()",
+        "Kustutada ainult taskList HTML",
+        "Muuta STORAGE_KEY nime",
+        "Lisada igale ülesandele sama indeks"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kõigi ülesannete eemaldamiseks tuleb muuta ka salvestatud andmeid. saveTasks([]) kirjutab tühja massiivi ja renderTasks() uuendab seejärel kuva.",
+      "hint": "Ainult DOM-i tühjendamisest ei piisa. Mis juhtuks muidu lehe uuesti laadimisel?"
+    },
+    {
+      "level": 15,
+      "question": "Miks ei piisa kustutamisel ainult li-elemendi eemaldamisest DOM-ist?",
+      "options": [
+        "Lehe uuesti laadimisel tuleks ülesanne localStorage-ist tagasi",
+        "CSS lõpetaks töötamise",
+        "Sisestusväli muutuks numbriks",
+        "Brauser kustutaks kogu localStorage-i"
+      ],
+      "correctIndex": 0,
+      "explanation": "DOM on ainult hetkel nähtav kuva. Kui localStorage-i massiivi ei muudeta, loeb renderTasks() ülesande järgmisel laadimisel uuesti sisse.",
+      "hint": "Kumb on selles rakenduses püsiv: DOM või localStorage?"
+    },
+    {
+      "level": 15,
+      "question": "Mis võib juhtuda, kui kaks brauseri vahelehte muudavad sama nimekirja korraga?",
+      "options": [
+        "Ühe vahelehe hilisem salvestus võib teise muudatuse üle kirjutada",
+        "Brauser liidab muudatused alati õigesti",
+        "Mõlemad vahelehed sulguvad",
+        "Ülesanded muutuvad automaatselt avalikuks"
+      ],
+      "correctIndex": 0,
+      "explanation": "Mõlemad vahelehed võivad lugeda sama vana massiivi ja salvestada hiljem erineva tulemuse. Viimasena tehtud salvestus võib teise muudatuse kaotada.",
+      "hint": "Mõtle kahele inimesele, kes muudavad sama vana koopiat ja salvestavad eri ajal."
+    },
+    {
+      "level": 15,
+      "question": "Mida oleks vaja, et samad ülesanded oleksid nähtavad ka kasutaja teises seadmes?",
+      "options": [
+        "Serverit või pilveteenust, kuhu andmed kasutajakonto alla salvestada",
+        "Suuremat CSS-faili",
+        "Teist STORAGE_KEY nime",
+        "Ainult uut kustutamisnuppu"
+      ],
+      "correctIndex": 0,
+      "explanation": "localStorage asub ainult konkreetses brauseris ja seadmes. Seadmete vahel sünkroonimiseks peab rakendus saatma andmed serverisse ning siduma need kasutajaga.",
+      "hint": "Kas ühe arvuti brauseri localStorage on teises telefonis kättesaadav?"
+    }
+  ]
+}

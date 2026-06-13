@@ -1,0 +1,604 @@
+{
+  "assignment": "# JavaScripti kalkulaator\n\nLoo veebikalkulaator, mis võimaldab kasutajal sisestada kaks arvu ja teha nendega põhilisi aritmeetilisi tehteid.\n\n## Nõuded\n\n- Kasutajal on kaks sisendit (`num1` ja `num2`) arvude sisestamiseks\n- Neli operatsiooninuppu: liitmine (`+`), lahutamine (`-`), korrutamine (`*`), jagamine (`/`)\n- Tulemus kuvatakse ekraanil\n- Tühjenda-nupp lähtestab mõlemad sisendid ja tulemuse\n- Vale sisendi korral (tühi väli, mitte-arv) kuvatakse selgitav veateade\n- Nulliga jagamist ei lubata — kuvatakse veateade\n\n## Nõutud failid\n\n- `index.html` — rakenduse struktuur\n- `style.css` — kujundus\n- `script.js` — kogu loogika\n\n## Hindamiskriteeriumid\n\n- Kõik neli operatsiooni töötavad korrektselt\n- Tühja sisendi korral kuvatakse veateade (mitte arvutataks `NaN`-iga)\n- Nulliga jagamine käsitletakse eraldi veateatega\n- Sündmuste delegeerimine: üks `addEventListener` `buttons` konteineril, mitte igal nupul eraldi\n- `data-op` atribuuti kasutatakse operaatori edastamiseks\n- `parseFloat()` kasutatakse sisendi teisendamiseks arvuks\n- `isNaN()` kasutatakse vale sisendi tuvastamiseks",
+  "solutionFiles": [
+    {
+      "path": "index.html",
+      "content": "<!DOCTYPE html>\n<html lang=\"et\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Kalkulaator</title>\n  <link rel=\"stylesheet\" href=\"style.css\">\n</head>\n<body>\n  <div class=\"calculator\">\n    <h1>Kalkulaator</h1>\n    <div class=\"inputs\">\n      <input type=\"number\" id=\"num1\" placeholder=\"Esimene arv\">\n      <input type=\"number\" id=\"num2\" placeholder=\"Teine arv\">\n    </div>\n    <div class=\"buttons\">\n      <button data-op=\"+\">+</button>\n      <button data-op=\"-\">−</button>\n      <button data-op=\"*\">×</button>\n      <button data-op=\"/\">÷</button>\n    </div>\n    <div id=\"result\" class=\"result\">Tulemus kuvatakse siin</div>\n    <button id=\"clear\">Tühjenda</button>\n  </div>\n  <script src=\"script.js\"></script>\n</body>\n</html>\n"
+    },
+    {
+      "path": "script.js",
+      "content": "const num1Input = document.getElementById('num1');\nconst num2Input = document.getElementById('num2');\nconst resultDiv = document.getElementById('result');\n\ndocument.querySelector('.buttons').addEventListener('click', function(event) {\n  const button = event.target.closest('button[data-op]');\n  if (!button) return;\n  calculate(button.dataset.op);\n});\n\ndocument.getElementById('clear').addEventListener('click', function() {\n  num1Input.value = '';\n  num2Input.value = '';\n  resultDiv.textContent = 'Tulemus kuvatakse siin';\n  resultDiv.className = 'result';\n});\n\nfunction calculate(operator) {\n  const a = parseFloat(num1Input.value);\n  const b = parseFloat(num2Input.value);\n\n  if (isNaN(a) || isNaN(b)) {\n    showError('Palun sisesta mõlemasse välja arv');\n    return;\n  }\n\n  if (operator === '/' && b === 0) {\n    showError('Nulliga jagamine pole lubatud');\n    return;\n  }\n\n  const operations = {\n    '+': a + b,\n    '-': a - b,\n    '*': a * b,\n    '/': a / b,\n  };\n\n  const result = operations[operator];\n  resultDiv.textContent = `${a} ${operator} ${b} = ${result}`;\n  resultDiv.className = 'result success';\n}\n\nfunction showError(message) {\n  resultDiv.textContent = message;\n  resultDiv.className = 'result error';\n}\n"
+    },
+    {
+      "path": "style.css",
+      "content": "* { box-sizing: border-box; margin: 0; padding: 0; }\n\nbody {\n  font-family: sans-serif;\n  background: #f0f0f0;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  min-height: 100vh;\n}\n\n.calculator {\n  background: white;\n  border-radius: 12px;\n  padding: 24px;\n  box-shadow: 0 4px 20px rgba(0,0,0,0.1);\n  width: 300px;\n}\n\nh1 { text-align: center; margin-bottom: 16px; font-size: 20px; }\n\n.inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }\n\ninput[type=\"number\"] {\n  padding: 10px;\n  border: 1px solid #ccc;\n  border-radius: 6px;\n  font-size: 16px;\n  width: 100%;\n}\n\n.buttons {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 8px;\n  margin-bottom: 12px;\n}\n\nbutton {\n  padding: 12px;\n  border: none;\n  border-radius: 6px;\n  background: #4a90e2;\n  color: white;\n  font-size: 18px;\n  cursor: pointer;\n}\n\nbutton:hover { background: #357abd; }\n\n#clear { width: 100%; background: #ccc; color: #333; margin-top: 8px; }\n#clear:hover { background: #bbb; }\n\n.result {\n  padding: 12px;\n  text-align: center;\n  background: #f8f8f8;\n  border-radius: 6px;\n  border: 1px solid #e0e0e0;\n  min-height: 44px;\n}\n\n.result.success { border-color: #4dd089; background: #f0fff8; color: #1a7a45; }\n.result.error { border-color: #ef5d5d; background: #fff0f0; color: #b00020; }\n"
+    }
+  ],
+  "questions": [
+    {
+      "level": 1,
+      "question": "Mis on kalkulaatori peamine eesmärk?",
+      "options": [
+        "Kuvada pilte",
+        "Teha kahe arvuga aritmeetilisi tehteid",
+        "Salvestada teksti",
+        "Saata e-kirju"
+      ],
+      "correctIndex": 1,
+      "explanation": "Rakendus võimaldab sisestada kaks arvu ning neid liita, lahutada, korrutada või jagada.",
+      "hint": "Vaata sisestusvälju ja nelja tehtenuppu."
+    },
+    {
+      "level": 1,
+      "question": "Mitu arvu saab kasutaja enne tehte valimist sisestada?",
+      "options": [
+        "Ühe",
+        "Kaks",
+        "Kolm",
+        "Neli"
+      ],
+      "correctIndex": 1,
+      "explanation": "HTML-is on kaks arvusisendit: num1 ja num2.",
+      "hint": "Loenda kalkulaatori sisestusväljad."
+    },
+    {
+      "level": 1,
+      "question": "Kus kuvatakse arvutuse tulemus?",
+      "options": [
+        "Nupul „Tühjenda“",
+        "Elemendis id-ga result",
+        "Brauseri aadressiribal",
+        "CSS-failis"
+      ],
+      "correctIndex": 1,
+      "explanation": "Tulemuse jaoks on HTML-is eraldi element id-ga result.",
+      "hint": "Otsi HTML-ist teksti „Tulemus kuvatakse siin“."
+    },
+    {
+      "level": 2,
+      "question": "Millised tehted on kalkulaatoris olemas?",
+      "options": [
+        "Liitmine, lahutamine, korrutamine ja jagamine",
+        "Ainult liitmine",
+        "Protsent ja ruutjuur",
+        "Teksti kopeerimine ja kleepimine"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kalkulaatoris on nupud nelja põhitehte jaoks.",
+      "hint": "Vaata nuppudel olevaid sümboleid."
+    },
+    {
+      "level": 2,
+      "question": "Mida teeb nupp „Tühjenda“?",
+      "options": [
+        "Sulgeb lehe",
+        "Eemaldab sisestatud arvud ja taastab tulemuse algseisu",
+        "Kordab viimast tehet",
+        "Salvestab tulemuse"
+      ],
+      "correctIndex": 1,
+      "explanation": "Tühjendamise kuulaja seab mõlema sisendi väärtuse tühjaks ja taastab tulemuse algteksti.",
+      "hint": "Vaata clear-nupu click-kuulajat."
+    },
+    {
+      "level": 2,
+      "question": "Milline fail sisaldab kalkulaatori arvutamise loogikat?",
+      "options": [
+        "index.html",
+        "style.css",
+        "script.js",
+        "assignment.md"
+      ],
+      "correctIndex": 2,
+      "explanation": "script.js sisaldab sündmuste kuulajaid, sisendi kontrollimist ja arvutamist.",
+      "hint": "Millises avatud failis on function calculate?"
+    },
+    {
+      "level": 3,
+      "question": "Milleks kasutatakse index.html faili?",
+      "options": [
+        "Lehe struktuuri ja elementide kirjeldamiseks",
+        "Ainult värvide määramiseks",
+        "Andmete salvestamiseks serverisse",
+        "Arvutuste testimiseks"
+      ],
+      "correctIndex": 0,
+      "explanation": "HTML määrab sisestusväljad, nupud ja tulemuse ala.",
+      "hint": "Mõtle, milline fail sisaldab input- ja button-elemente."
+    },
+    {
+      "level": 3,
+      "question": "Milleks kasutatakse style.css faili?",
+      "options": [
+        "Arvutamiseks",
+        "Rakenduse välimuse kujundamiseks",
+        "Sisestatud arvude salvestamiseks",
+        "Nuppude sündmuste kuulamiseks"
+      ],
+      "correctIndex": 1,
+      "explanation": "CSS määrab värvid, vahed, suurused ja muu kujunduse.",
+      "hint": "Vaata, millises failis on background, padding ja color."
+    },
+    {
+      "level": 3,
+      "question": "Miks on arvude sisestusväljade tüüp number?",
+      "options": [
+        "Et brauser teaks, et sinna oodatakse arve",
+        "Et tekst muutuks automaatselt siniseks",
+        "Et tulemus salvestuks",
+        "Et nupp töötaks kiiremini"
+      ],
+      "correctIndex": 0,
+      "explanation": "type=\"number\" annab kasutajale arvude sisestamiseks sobiva välja.",
+      "hint": "Vaata input-elementide type atribuuti."
+    },
+    {
+      "level": 4,
+      "question": "Mis juhtub, kui üks arv jääb sisestamata?",
+      "options": [
+        "Kuvatakse veateade",
+        "Puuduv arv asendatakse alati nulliga",
+        "Leht sulgub",
+        "Tehakse ainult esimese arvuga tehe"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kood kontrollib mõlemat sisendit ja kuvab puuduva või vigase arvu korral veateate.",
+      "hint": "Otsi script.js failist teksti „Palun sisesta“."
+    },
+    {
+      "level": 4,
+      "question": "Mis juhtub nulliga jagamisel?",
+      "options": [
+        "Kuvatakse veateade",
+        "Tulemuseks kuvatakse alati 0",
+        "Leht laaditakse uuesti",
+        "Sisendid kustutatakse"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kood kontrollib enne jagamist, kas teine arv on null, ja kuvab eraldi veateate.",
+      "hint": "Otsi koodist tingimust b === 0."
+    },
+    {
+      "level": 4,
+      "question": "Mida näitab roheline tulemuse kujundus?",
+      "options": [
+        "Arvutus õnnestus",
+        "Sisend oli vigane",
+        "Leht on võrguühenduseta",
+        "Tulemus kustutati"
+      ],
+      "correctIndex": 0,
+      "explanation": "Õnnestunud arvutuse järel lisatakse tulemusele success-klass, mille CSS on roheline.",
+      "hint": "Võrdle CSS-is result.success ja result.error klasse."
+    },
+    {
+      "level": 5,
+      "question": "Mida teeb calculate() funktsioon?",
+      "options": [
+        "Loeb arvud, kontrollib neid ja arvutab tulemuse",
+        "Muudab ainult lehe värvi",
+        "Kustutab HTML-faili",
+        "Salvestab kasutaja parooli"
+      ],
+      "correctIndex": 0,
+      "explanation": "calculate() loeb sisendid, kontrollib vigu, valib tehte ja kuvab tulemuse.",
+      "hint": "Vaata funktsiooni samme algusest lõpuni."
+    },
+    {
+      "level": 5,
+      "question": "Milleks kasutatakse showError() funktsiooni?",
+      "options": [
+        "Veateate kuvamiseks tulemuse alas",
+        "Õige vastuse arvutamiseks",
+        "Nuppude peitmiseks",
+        "CSS-faili laadimiseks"
+      ],
+      "correctIndex": 0,
+      "explanation": "showError() paneb tulemuse alasse veateate ja lisab error-klassi.",
+      "hint": "Vaata, mida funktsioon muudab resultDiv elemendis."
+    },
+    {
+      "level": 5,
+      "question": "Kuidas saab JavaScript teada, millist tehtenuppu vajutati?",
+      "options": [
+        "Nupu data-op väärtuse järgi",
+        "Nupu värvi järgi",
+        "CSS-faili nime järgi",
+        "Sisestatud arvude suuruse järgi"
+      ],
+      "correctIndex": 0,
+      "explanation": "Igal tehtenupul on data-op atribuut väärtusega +, -, * või /. JavaScript loeb selle väärtuse.",
+      "hint": "Võrdle HTML-i data-op atribuute ja button.dataset.op koodi."
+    },
+    {
+      "level": 6,
+      "question": "Miks kasutatakse sisendi lugemisel parseFloat() meetodit?",
+      "options": [
+        "Et muuta sisendväljast saadud tekst arvuks",
+        "Et kustutada tühikud CSS-ist",
+        "Et lisada uus nupp",
+        "Et salvestada tulemus"
+      ],
+      "correctIndex": 0,
+      "explanation": "Sisendvälja value on tekst. parseFloat muudab selle arvuks, millega saab korrektselt arvutada.",
+      "hint": "Mis tüüpi väärtus tuleb input.value kaudu?"
+    },
+    {
+      "level": 6,
+      "question": "Milleks kasutatakse isNaN() kontrolli?",
+      "options": [
+        "Et tuvastada, kas sisendist ei saadud kehtivat arvu",
+        "Et kontrollida nupu värvi",
+        "Et võrrelda kahte CSS-klassi",
+        "Et ümardada tulemus"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kui parseFloat ei saa sisendist arvu, tekib NaN. isNaN aitab selle enne arvutamist avastada.",
+      "hint": "Mida tähendab NaN?"
+    },
+    {
+      "level": 6,
+      "question": "Miks lõpetatakse calculate() pärast veateate kuvamist return-käsuga?",
+      "options": [
+        "Et vigase sisendiga arvutamist ei jätkataks",
+        "Et brauser sulgeda",
+        "Et CSS uuesti laadida",
+        "Et nupp eemaldada"
+      ],
+      "correctIndex": 0,
+      "explanation": "return peatab funktsiooni. Nii ei jõua vigane sisend operations objektini ega tulemuse kuvamiseni.",
+      "hint": "Mis juhtuks, kui kood jätkaks pärast vea leidmist?"
+    },
+    {
+      "level": 7,
+      "question": "Kuidas liigub vajutatud nupu tehe calculate() funktsiooni?",
+      "options": [
+        "button.dataset.op antakse funktsioonile argumendina",
+        "Tehe loetakse CSS-failist",
+        "Tehe võetakse resultDiv tekstist",
+        "Brauser valib tehte juhuslikult"
+      ],
+      "correctIndex": 0,
+      "explanation": "Klikikuulaja loeb nupu data-op väärtuse ning kutsub calculate(button.dataset.op).",
+      "hint": "Jälgi button.dataset.op väärtust klikikuulajast calculate() parameetrini."
+    },
+    {
+      "level": 7,
+      "question": "Miks kontrollitakse nulliga jagamist enne operations objekti kasutamist?",
+      "options": [
+        "Et vältida Infinity kuvamist ja anda arusaadav veateade",
+        "Et muuta null üheks",
+        "Et korrutamine töötaks",
+        "Et tulemus muutuks tekstiks"
+      ],
+      "correctIndex": 0,
+      "explanation": "JavaScript annaks nulliga jagamisel Infinity. Eraldi kontroll peatab arvutuse ja kuvab kasutajale selge vea.",
+      "hint": "Mis oleks 5 / 0 JavaScriptis ilma kontrollita?"
+    },
+    {
+      "level": 7,
+      "question": "Mida teeb operations[operator]?",
+      "options": [
+        "Valib operaatori järgi õige arvutustulemuse",
+        "Muudab operaatori HTML-elemendiks",
+        "Kustutab teised tehted",
+        "Kontrollib sisendvälja tüüpi"
+      ],
+      "correctIndex": 0,
+      "explanation": "operations objektis on iga tehtemärgi juures vastav tulemus. Nurksulgudes operator valib õige kirje.",
+      "hint": "Vaata operations objekti võtmeid ja operator muutuja väärtust."
+    },
+    {
+      "level": 8,
+      "question": "Miks on klikikuulaja lisatud nuppude ühisele konteinerile?",
+      "options": [
+        "Üks kuulaja saab käsitleda kõigi tehtenuppude klikke",
+        "Nuppudele ei saa kuulajaid lisada",
+        "Konteiner arvutab tulemuse CSS-iga",
+        "See takistab arvude sisestamist"
+      ],
+      "correctIndex": 0,
+      "explanation": "Sündmuste delegeerimine võimaldab ühe kuulajaga käsitleda kõiki konteineri tehtenuppe.",
+      "hint": "Mitu eraldi tehtenupu kuulajat koodis on?"
+    },
+    {
+      "level": 8,
+      "question": "Mida teeb event.target.closest(\"button[data-op]\")?",
+      "options": [
+        "Leiab klõpsatud tehtenupu või tagastab null",
+        "Leiab esimese sisestusvälja",
+        "Muudab kõik nupud aktiivseks",
+        "Loeb CSS-klassi väärtuse"
+      ],
+      "correctIndex": 0,
+      "explanation": "closest otsib klõpsatud elemendist ülespoole sobivat data-op atribuudiga nuppu.",
+      "hint": "Mis juhtub, kui klõpsatakse nupu sees olevale elemendile või tühjale alale?"
+    },
+    {
+      "level": 8,
+      "question": "Miks kontrollitakse if (!button) return?",
+      "options": [
+        "Et tühjal alal klõpsates arvutust ei käivitataks",
+        "Et kõik nupud kustutada",
+        "Et esimene arv nulliks muuta",
+        "Et tulemus alati peita"
+      ],
+      "correctIndex": 0,
+      "explanation": "Kui klikk ei tulnud tehtenupult, on button väärtus null. return lõpetab kuulaja töö.",
+      "hint": "Mida tagastab closest, kui sobivat nuppu ei leita?"
+    },
+    {
+      "level": 9,
+      "question": "Miks kasutatakse veateate ja tulemuse kuvamiseks eraldi CSS-klasse?",
+      "options": [
+        "Et kasutaja eristaks õnnestumist ja viga ka kujunduse järgi",
+        "Et JavaScript kiiremini arvutaks",
+        "Et sisendid muutuksid tekstiks",
+        "Et data-op töötaks"
+      ],
+      "correctIndex": 0,
+      "explanation": "success ja error klassid annavad tulemusele erineva värvi ja tausta.",
+      "hint": "Võrdle result.success ja result.error reegleid."
+    },
+    {
+      "level": 9,
+      "question": "Mis juhtub, kui operations objektis puudub vajutatud nupu operaator?",
+      "options": [
+        "Tulemuseks saadakse undefined",
+        "Käivitatakse automaatselt liitmine",
+        "Tulemuseks saadakse alati 0",
+        "Brauser parandab operaatori"
+      ],
+      "correctIndex": 0,
+      "explanation": "Objektist puuduva võtme lugemine annab undefined. Seetõttu oleks mõistlik tundmatut operaatorit kontrollida.",
+      "hint": "Mida tagastab objekt puuduva võtme korral?"
+    },
+    {
+      "level": 9,
+      "question": "Miks kasutatakse tulemuse kuvamisel textContent omadust?",
+      "options": [
+        "See kuvab väärtuse tekstina ega tõlgenda seda HTML-ina",
+        "See salvestab tulemuse localStorage-i",
+        "See teeb arvutuse ise",
+        "See lisab automaatselt success-klassi"
+      ],
+      "correctIndex": 0,
+      "explanation": "textContent muudab elemendi teksti turvaliselt. HTML-märgendeid ei käivitata.",
+      "hint": "Mis vahe on teksti näitamisel ja HTML-i tõlgendamisel?"
+    },
+    {
+      "level": 10,
+      "question": "Kuidas liiguvad andmed arvutuse ajal õiges järjekorras?",
+      "options": [
+        "Sisendid → parseFloat → kontrollid → tehte valik → tulemuse kuvamine",
+        "CSS → HTML → server → sisendid",
+        "Tulemus → sisendid → nupp → parseFloat",
+        "Nupp → CSS → assignment.md"
+      ],
+      "correctIndex": 0,
+      "explanation": "calculate() loeb sisendid, teisendab need arvudeks, kontrollib vead, valib tehte ja kuvab tulemuse.",
+      "hint": "Järgi calculate() funktsiooni ridu ülevalt alla."
+    },
+    {
+      "level": 10,
+      "question": "Milline osa koodist tagab, et ühe tühja välja korral kuvatakse viga?",
+      "options": [
+        "isNaN(a) || isNaN(b)",
+        "operator === \"/\"",
+        "resultDiv.className",
+        "button.dataset.op"
+      ],
+      "correctIndex": 0,
+      "explanation": "OR-operaator || muudab tingimuse tõeseks, kui vähemalt üks kahest väärtusest ei ole arv.",
+      "hint": "Kas vea jaoks peab vigane olema üks väli või mõlemad?"
+    },
+    {
+      "level": 10,
+      "question": "Miks on tühjendamisnupul eraldi klikikuulaja?",
+      "options": [
+        "See ei ole data-op tehtenupp ja teeb teistsugust toimingut",
+        "Konteiner ei toeta nuppe",
+        "See asub CSS-failis",
+        "See peab alati tegema liitmistehte"
+      ],
+      "correctIndex": 0,
+      "explanation": "Tehtenuppude kuulaja otsib ainult button[data-op] elemente. Tühjendamisnupp lähtestab väljad ning vajab oma loogikat.",
+      "hint": "Kas nupul „Tühjenda“ on data-op atribuut?"
+    },
+    {
+      "level": 11,
+      "question": "Miks oleks arvutamise loogikat lihtsam testida eraldi funktsioonina?",
+      "options": [
+        "Eraldi funktsioon muudab CSS-i automaatselt",
+        "Funktsioonile saab anda arvud ja operaatori ning kontrollida tulemust ilma nuppe vajutamata",
+        "Brauser nõuab iga tehte jaoks eraldi faili",
+        "Eraldi funktsioon eemaldab vajaduse sisendite järele"
+      ],
+      "correctIndex": 1,
+      "explanation": "Kui arvutamine oleks näiteks funktsioonis arvuta(a, b, operator), saaks sellele anda testväärtused ja võrrelda tagastatud tulemust oodatud vastusega. Praegune calculate() loeb väärtused otse DOM-ist, mistõttu on seda keerulisem eraldi testida.",
+      "hint": "Mõtle, kas arvutuse kontrollimiseks peab tingimata veebilehel nuppe vajutama."
+    },
+    {
+      "level": 11,
+      "question": "Millised kaks olukorda peaks kalkulaatori veakäsitluse test kindlasti katma?",
+      "options": [
+        "Ainult liitmise ja lahutamise",
+        "Tühja sisendi ja nulliga jagamise",
+        "Lehe taustavärvi ja fondi",
+        "Hiire liikumise ja kerimise"
+      ],
+      "correctIndex": 1,
+      "explanation": "Ülesande nõuetes on eraldi nimetatud vale sisend ja nulliga jagamine. Seetõttu tuleb kontrollida, et mõlemal juhul kuvatakse õige veateade ja arvutust ei jätkata.",
+      "hint": "Vaata ülesande nõuetes nimetatud veajuhtumeid."
+    },
+    {
+      "level": 11,
+      "question": "Kuidas lisada kalkulaatorile uus protsenditehe kõige väiksema muudatusega?",
+      "options": [
+        "Lisada uus nupp ja vastav arvutus operations objekti",
+        "Kirjutada kogu JavaScript uuesti",
+        "Muuta kõik sisendid tekstialadeks",
+        "Eemaldada calculate() funktsioon"
+      ],
+      "correctIndex": 0,
+      "explanation": "Praegune lahendus valib tehte operations objekti abil. Uue tehte jaoks tuleb lisada sobiva data-op väärtusega nupp ja sama võtmega arvutus operations objekti.",
+      "hint": "Vaata, kuidas olemasolevad nupud ja operations objekti võtmed omavahel seotud on."
+    },
+    {
+      "level": 12,
+      "question": "Miks tuleks enne tulemuse kuvamist kontrollida, kas operator on lubatud?",
+      "options": [
+        "Et CSS kiiremini laadiks",
+        "Tundmatu operaatori korral annab operations[operator] väärtuse undefined",
+        "Et input-väljad ei kaoks",
+        "Sest parseFloat kontrollib ainult operaatoreid"
+      ],
+      "correctIndex": 1,
+      "explanation": "Kui HTML-i satub tundmatu data-op väärtus, ei ole operations objektis vastavat võtit. Siis saadakse tulemuseks undefined. Lubatud operaatorite kontroll annaks kasutajale arusaadava veateate.",
+      "hint": "Mis juhtub objektist sellise võtme küsimisel, mida seal ei ole?"
+    },
+    {
+      "level": 12,
+      "question": "Miks on tulemuse kuvamiseks textContent turvalisem kui innerHTML?",
+      "options": [
+        "textContent kuvab väärtuse tekstina ega tõlgenda seda HTML-ina",
+        "textContent teeb alati teksti rasvaseks",
+        "innerHTML ei tööta div-elemendiga",
+        "textContent salvestab tulemuse serverisse"
+      ],
+      "correctIndex": 0,
+      "explanation": "textContent kuvab sisu tavalise tekstina. innerHTML tõlgendaks HTML-märgendeid, mis võib kasutaja sisendi kuvamisel tekitada turvariski.",
+      "hint": "Mõtle, kas kasutaja sisestatud märgendeid peaks käivitama või lihtsalt tekstina näitama."
+    },
+    {
+      "level": 12,
+      "question": "Mis peaks juhtuma, kui kasutaja vajutab pärast veateadet nuppu „Tühjenda“?",
+      "options": [
+        "Alles peaks jääma veateade",
+        "Sisendid ja tulemus peaksid lähtestuma ning veateate kujundus kaduma",
+        "Leht peaks sulguma",
+        "Viimane arvutus peaks korduma"
+      ],
+      "correctIndex": 1,
+      "explanation": "Tühjendamise kuulaja eemaldab sisendite väärtused, taastab algteksti ja seab tulemuse klassiks ainult result. Nii kaovad ka error- ja success-klassid.",
+      "hint": "Vaata, millised kolm väärtust clear-nupu kuulajas muudetakse."
+    },
+    {
+      "level": 13,
+      "question": "Miks võib tulemus 0.1 + 0.2 kasutajat üllatada?",
+      "options": [
+        "Brauser liidab arvud tekstina",
+        "Komaarve ei saa arvutis alati täiesti täpselt esitada",
+        "Liitmine töötab ainult täisarvudega",
+        "data-op muudab arve"
+      ],
+      "correctIndex": 1,
+      "explanation": "JavaScripti komaarvude esitus võib anda väikese ümardusvea, näiteks 0.30000000000000004. Kuvamisel võib tulemuse sobiva arvu kümnendkohtadeni ümardada.",
+      "hint": "Kas kõiki kümnendmurde saab arvutis täiesti täpselt talletada?"
+    },
+    {
+      "level": 13,
+      "question": "Kuidas vältida väga pika või ebamugava tulemuse kuvamist?",
+      "options": [
+        "Piirata kuvatavate kümnendkohtade arvu, näiteks toFixed() abil",
+        "Eemaldada jagamistehe",
+        "Muuta numbrid stringideks enne arvutust",
+        "Peita resultDiv"
+      ],
+      "correctIndex": 0,
+      "explanation": "toFixed() võimaldab kuvada kindla arvu kümnendkohti. Tuleb arvestada, et meetod tagastab stringi, kuid ainult kuvamiseks sobib see hästi.",
+      "hint": "Milline meetod võimaldab määrata kuvatavate kümnendkohtade arvu?"
+    },
+    {
+      "level": 13,
+      "question": "Mis juhtub negatiivsete arvude sisestamisel?",
+      "options": [
+        "parseFloat ei luba negatiivseid arve",
+        "Arvutused töötavad ka negatiivsete arvudega",
+        "Käivitatakse alati veateade",
+        "Negatiivne arv muudetakse nulliks"
+      ],
+      "correctIndex": 1,
+      "explanation": "input type=\"number\" ja parseFloat toetavad negatiivseid arve. Kuna kood kontrollib ainult NaN-väärtust ja nulliga jagamist, töötavad tavatehted negatiivsete arvudega.",
+      "hint": "Kas miinusmärgiga arv on endiselt kehtiv arv?"
+    },
+    {
+      "level": 14,
+      "question": "Kuidas saaks kasutaja kalkulaatorit kasutada ka klaviatuuriga?",
+      "options": [
+        "Kuulata keydown-sündmust ja siduda operaatoriklahvid calculate() funktsiooniga",
+        "Lisada igale nupule uus CSS-klass",
+        "Salvestada klahvid localStorage-sse",
+        "Muuta nupud linkideks"
+      ],
+      "correctIndex": 0,
+      "explanation": "keydown-sündmuse kaudu saab kontrollida event.key väärtust. Kui vajutati +, -, * või /, saab kutsuda olemasolevat calculate() funktsiooni.",
+      "hint": "Milline sündmus käivitub klahvi vajutamisel?"
+    },
+    {
+      "level": 14,
+      "question": "Mida tuleks muuta, et veateade oleks ekraanilugejale paremini märgatav?",
+      "options": [
+        "Lisada tulemuse alale sobiv aria-live atribuut",
+        "Muuta veateade ainult punaseks",
+        "Eemaldada tulemuse tekst",
+        "Kasutada ainult alert() akent"
+      ],
+      "correctIndex": 0,
+      "explanation": "aria-live võimaldab ekraanilugejal teatada muutunud tulemusest või veast. Ainult värvimuutus ei ole kõigile kasutajatele piisav.",
+      "hint": "Kuidas saab abitehnoloogia teada, et lehe tekst muutus?"
+    },
+    {
+      "level": 14,
+      "question": "Kuidas lisada lihtne arvutuste ajalugu?",
+      "options": [
+        "Lisada iga õnnestunud arvutuse tekst massiivi ja kuvada massiiv loendina",
+        "Muuta operations objekt stringiks",
+        "Kustutada tulemus pärast iga tehet",
+        "Lisada uus parseFloat kutse"
+      ],
+      "correctIndex": 0,
+      "explanation": "Pärast õnnestunud arvutust saab avaldise ja tulemuse lisada massiivi. Seejärel saab ajaloo kuvada HTML-loendina. Praegu hoitakse ainult viimast tulemust.",
+      "hint": "Millises andmestruktuuris saab hoida mitu varasemat tulemust?"
+    },
+    {
+      "level": 15,
+      "question": "Milline kontroll muudaks kalkulaatori tundmatu operaatori vastu töökindlamaks?",
+      "options": [
+        "Kontrollida enne arvutust, kas operator on operations objekti võti",
+        "Kontrollida ainult sisendite värvi",
+        "Lisada igale nupule sama id",
+        "Asendada parseFloat meetodiga alert"
+      ],
+      "correctIndex": 0,
+      "explanation": "Enne operations[operator] kasutamist saab kontrollida, kas vastav võti on olemas. Kui ei ole, tuleb kuvada veateade ja funktsioon lõpetada.",
+      "hint": "Kontrolli mitte ainult arve, vaid ka seda, millist tehet palutakse teha."
+    },
+    {
+      "level": 15,
+      "question": "Milline muudatus teeks arvutusloogika lihtsamini korduskasutatavaks?",
+      "options": [
+        "Eraldada arvutamine funktsiooni, mis võtab a, b ja operaatori ning tagastab tulemuse",
+        "Kirjutada arvutus otse iga nupu HTML-i",
+        "Kasutada kõigi muutujate jaoks var-i",
+        "Eemaldada veakontrollid"
+      ],
+      "correctIndex": 0,
+      "explanation": "Puhas arvutusfunktsioon ei sõltuks sisendväljadest ega tulemuselemendist. Seda saaks kasutada nii veebilehel, testides kui ka mõnes teises kasutajaliideses.",
+      "hint": "Milline osa koodist ei pea tegelikult DOM-ist midagi teadma?"
+    },
+    {
+      "level": 15,
+      "question": "Milline test kontrollib kõige paremini kogu kasutusvoogu?",
+      "options": [
+        "Sisestada 8 ja 2, vajutada jagamist ning kontrollida, et kuvatakse 8 / 2 = 4",
+        "Kontrollida ainult faili nime",
+        "Kontrollida ainult nupu taustavärvi",
+        "Avada leht ilma midagi tegemata"
+      ],
+      "correctIndex": 0,
+      "explanation": "Selline test läbib kogu põhivoo: sisendite täitmine, nupuvajutus, operaatori edastamine, arvutamine ja tulemuse kuvamine.",
+      "hint": "Hea terviktest jäljendab kasutaja tegelikke samme algusest tulemuseni."
+    }
+  ]
+}
