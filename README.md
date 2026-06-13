@@ -2,6 +2,8 @@
 
 Interaktiivne veebirakendus, mis kontrollib, kas kasutaja mõistab programmeerimisülesande lahendust. Töötab miljonimängu põhimõttel: 15 valikvastustega küsimust, mille ebaõige vastamine lõpetab mängu.
 
+**Project board (Kanban):** https://github.com/users/sljezov/projects/1
+
 ## Projekti kirjeldus
 
 Rakendus loeb `public/data/` kaustast lahendusfailid ja küsimustepangad ning koostab igal mängimisel uue 15 küsimusega komplekti. Õppijale ei kuvata lähteülesande teksti: HTML-, CSS- ja JavaScripti lahendusfailid on kogu mängu vältel küsimuste kõrval nähtavad. Küsimused on eelgenereeritud AI abil ja salvestatud JSON-failidena, seega pole API võtit ega serverit vaja.
