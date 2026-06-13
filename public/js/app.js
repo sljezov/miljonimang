@@ -119,14 +119,221 @@ async function showTaskDetail(taskId, taskName) {
     state.taskTitle = taskName || taskId;
 
     startBtn.addEventListener('click', function() {
-      startBtn.disabled = true;
-      startBtn.textContent = 'Mängu käivitamine lisatakse järgmises arenduskorras...';
+      var questions = state.questionBank.slice(0, 15);
+      if (!questions.length) {
+        startBtn.disabled = true;
+        startBtn.textContent = 'Küsimustepank puudub';
+        return;
+      }
+      startGame(questions);
     });
   } catch (err) {
     titleEl.textContent = 'Viga teema laadimisel';
     filesEl.textContent = err.message;
     startBtn.disabled = true;
   }
+}
+
+function renderCodePanel() {
+  var tabs = document.getElementById('codeTabs');
+  var code = document.getElementById('solutionCode');
+  tabs.innerHTML = '';
+
+  if (!state.solutionFiles.length) {
+    code.textContent = 'Lahendusfaile ei leitud.';
+    return;
+  }
+
+  function showFile(selectedIndex) {
+    code.textContent = state.solutionFiles[selectedIndex].content;
+    tabs.querySelectorAll('button').forEach(function(button, index) {
+      var active = index === selectedIndex;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+  }
+
+  state.solutionFiles.forEach(function(file, index) {
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = file.path;
+    button.setAttribute('role', 'tab');
+    button.addEventListener('click', function() { showFile(index); });
+    tabs.appendChild(button);
+  });
+
+  showFile(0);
+}
+
+function startGame(questions) {
+  state.questions = questions;
+  state.index = 0;
+  state.selected = null;
+  state.locked = false;
+  state.lifelines = { fifty: true, hint: true, audience: true };
+  state.removed = [];
+  state.answers = [];
+
+  app.innerHTML = '';
+  app.appendChild(renderTemplate('gameTemplate'));
+
+  document.getElementById('quitBtn').addEventListener('click', function() {
+    if (confirm('Lahkuda mängust? Tulemuseks jääb seni teenitud punktisumma.')) {
+      finishGame({ reason: 'quit' });
+    }
+  });
+  document.getElementById('confirmBtn').addEventListener('click', confirmAnswer);
+  document.querySelectorAll('[data-lifeline]').forEach(function(btn) {
+    btn.addEventListener('click', function() { useLifeline(btn.dataset.lifeline); });
+  });
+
+  renderCodePanel();
+  renderLadder();
+  renderQuestion();
+}
+
+function renderLadder() {
+  var ladder = document.getElementById('ladder');
+  ladder.innerHTML = '';
+  for (var i = PRIZES.length - 1; i >= 0; i--) {
+    var li = document.createElement('li');
+    var level = i + 1;
+    li.dataset.level = level;
+    if (SAFE_LEVELS.includes(level)) li.classList.add('safe');
+    if (level === state.index + 1) li.classList.add('current');
+    if (level <= state.index) li.classList.add('passed');
+    li.innerHTML = '<span>' + level + '.</span><span>' + PRIZES[i].toLocaleString('et-EE') + ' p</span>';
+    ladder.appendChild(li);
+  }
+}
+
+function renderQuestion() {
+  var q = state.questions[state.index];
+  document.getElementById('qIndex').textContent = state.index + 1;
+  document.getElementById('qPrize').textContent = PRIZES[state.index].toLocaleString('et-EE') + ' punkti';
+
+  var nextSafe = SAFE_LEVELS.find(function(s) { return state.index + 1 <= s; });
+  document.getElementById('qSafe').textContent = nextSafe
+    ? 'Järgmine turvatase: ' + nextSafe + '. küsimus'
+    : 'Lõpufiniš!';
+
+  document.getElementById('questionText').textContent = q.question;
+
+  var optsList = document.getElementById('optionsList');
+  optsList.innerHTML = '';
+  state.selected = null;
+  state.locked = false;
+  state.removed = [];
+
+  var confirmBtn = document.getElementById('confirmBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Kinnita vastus';
+  confirmBtn.onclick = null;
+  document.getElementById('feedback').classList.add('hidden');
+  document.getElementById('lifelineOutput').classList.add('hidden');
+
+  q.options.forEach(function(opt, idx) {
+    var li = document.createElement('li');
+    li.dataset.idx = idx;
+    li.innerHTML = '<span class="marker">' + 'ABCD'[idx] + '</span><span>' + escapeHtml(opt) + '</span>';
+    li.addEventListener('click', function() { selectOption(idx); });
+    optsList.appendChild(li);
+  });
+
+  renderLadder();
+}
+
+function selectOption(idx) {
+  if (state.locked) return;
+  if (state.removed.includes(idx)) return;
+  state.selected = idx;
+  document.querySelectorAll('#optionsList li').forEach(function(li) {
+    li.classList.toggle('selected', Number(li.dataset.idx) === idx);
+  });
+  document.getElementById('confirmBtn').disabled = false;
+}
+
+function confirmAnswer() {
+  if (state.selected === null || state.locked) return;
+  state.locked = true;
+
+  var q = state.questions[state.index];
+  var correct = state.selected === q.correctIndex;
+
+  document.querySelectorAll('#optionsList li').forEach(function(li) {
+    var idx = Number(li.dataset.idx);
+    li.classList.add('locked');
+    if (idx === q.correctIndex) li.classList.add('correct');
+    if (idx === state.selected && !correct) li.classList.add('wrong');
+  });
+
+  state.answers.push({
+    question: q.question,
+    chosen: q.options[state.selected],
+    correct: q.options[q.correctIndex],
+    isCorrect: correct,
+    explanation: q.explanation,
+  });
+
+  var feedback = document.getElementById('feedback');
+  feedback.classList.remove('hidden');
+  feedback.classList.toggle('correct', correct);
+  feedback.classList.toggle('wrong', !correct);
+  feedback.innerHTML = '<strong>' + (correct ? '✓ Õige!' : '✗ Vale!') + '</strong> ' + escapeHtml(q.explanation || '');
+
+  var confirmBtn = document.getElementById('confirmBtn');
+  var isLastCorrect = correct && state.index === PRIZES.length - 1;
+
+  if (!correct) {
+    confirmBtn.textContent = 'Vaata tulemust';
+  } else if (isLastCorrect) {
+    confirmBtn.textContent = 'Vaata võitu 🏆';
+  } else {
+    confirmBtn.textContent = 'Edasi →';
+  }
+  confirmBtn.disabled = false;
+  confirmBtn.onclick = function() {
+    if (!correct) { finishGame({ reason: 'wrong' }); return; }
+    if (isLastCorrect) { finishGame({ reason: 'won' }); return; }
+    state.index += 1;
+    renderQuestion();
+  };
+}
+
+function useLifeline(name) {
+  // lifelines added in next iteration
+}
+
+function finishGame(opts) {
+  var reason = opts.reason;
+  var earned;
+  if (reason === 'won') {
+    earned = PRIZES[PRIZES.length - 1];
+  } else if (reason === 'quit') {
+    earned = state.index === 0 ? 0 : PRIZES[state.index - 1];
+  } else {
+    var lastSafe = SAFE_LEVELS.filter(function(s) { return s <= state.index; }).pop();
+    earned = lastSafe ? PRIZES[lastSafe - 1] : 0;
+  }
+
+  app.innerHTML = '';
+  app.appendChild(renderTemplate('resultTemplate'));
+
+  var heading = document.getElementById('resultHeading');
+  heading.textContent = reason === 'won'
+    ? '🏆 Miljon punkti!'
+    : reason === 'quit'
+    ? 'Lahkusid mängust'
+    : '✗ Vale vastus — mäng lõppes';
+  document.getElementById('resultMessage').textContent = reason === 'won'
+    ? 'Vastasid kõigile 15 küsimusele õigesti!'
+    : '';
+  document.getElementById('resultPrize').textContent = earned.toLocaleString('et-EE');
+
+  document.getElementById('playAgainBtn').addEventListener('click', function() {
+    startGame(state.questionBank.slice(0, 15));
+  });
+  document.getElementById('backToListBtn').addEventListener('click', showTaskList);
 }
 
 showTaskList();
