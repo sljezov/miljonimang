@@ -1,53 +1,53 @@
-# Miljonimäng
+# Miljonimang
 
-Interaktiivne veebirakendus, mis kontrollib, kas kasutaja mõistab programmeerimisülesande lahendust. Töötab miljonimängu põhimõttel: 15 valikvastustega küsimust, mille ebaõige vastamine lõpetab mängu.
+An interactive web app that checks whether a learner understands a programming assignment solution. It works like the "Who Wants to Be a Millionaire" game show: 15 multiple-choice questions, and one wrong answer ends the game.
 
 **Project board (Kanban):** https://github.com/users/sljezov/projects/1
 
-## Projekti kirjeldus
+## Project description
 
-Rakendus loeb `public/data/` kaustast lahendusfailid ja küsimustepangad ning koostab igal mängimisel uue 15 küsimusega komplekti. Õppijale ei kuvata lähteülesande teksti: HTML-, CSS- ja JavaScripti lahendusfailid on kogu mängu vältel küsimuste kõrval nähtavad. Küsimused on eelgenereeritud AI abil ja salvestatud JSON-failidena, seega pole API võtit ega serverit vaja.
+The app reads solution files and question banks from `public/data/` and picks a fresh set of 15 questions each game. The solution code is visible in a side panel throughout the game. Questions are pre-generated with AI and stored as JSON, so no API key or server is needed.
 
-Küsimused kontrollivad **kontseptuaalset arusaamist**, mitte päheõppimist: miks kasutati konkreetset meetodit, mis juhtub äärjuhtudel, kuidas andmed liiguvad funktsioonide vahel.
+Questions test **conceptual understanding**, not memorization: why a specific method was used, what happens in edge cases, how data flows between functions.
 
-## Kasutatud tehnoloogiad
+## Technologies used
 
-- HTML5, CSS3, vanilla JavaScript (ilma raamistikuta)
-- Brauseri `fetch()` API JSON-failide lugemiseks
-- GitHub Pages staatiline hostimine
+- HTML5, CSS3, vanilla JavaScript (no framework)
+- Browser `fetch()` API for loading JSON files
+- GitHub Pages for static hosting
 
-## Käivitamise juhend
+## Setup
 
-**Eeldused:** kaasaegne veebibrauser.
+**Requirements:** a modern web browser.
 
-### Lokaalselt
+### Run locally
 
-Kuna rakendus kasutab `fetch()`, on vaja HTTP-serverit (mitte `file://`):
+The app uses `fetch()`, so it needs an HTTP server (not `file://`):
 
 ```bash
 # Python 3
 python3 -m http.server 8080 --directory public
-# Ava: http://localhost:8080
+# Open: http://localhost:8080
 
 # Node.js (npx)
 npx serve public
-# Ava: http://localhost:3000
+# Open: http://localhost:3000
 ```
 
 ### GitHub Pages
 
-1. Lae repositoorium GitHubi üles
-2. Mine repositooriumi **Settings → Pages**
-3. Source: `main` haru, kaust `/public`
-4. Rakendus on kättesaadav aadressil `https://kasutajanimi.github.io/miljonimang/`
+1. Push the repository to GitHub
+2. Go to **Settings > Pages**
+3. Source: `main` branch, folder `/public`
+4. The app is available at `https://username.github.io/miljonimang/`
 
-## Input-kausta struktuur
+## Input folder structure
 
 ```
 input/
   001/
-    assignment.md   # Ülesande kirjeldus (kohustuslik)
-    index.html      # Lahenduse failid (vabalt valitud kujul)
+    assignment.md   # Assignment description (required)
+    index.html      # Solution files (any structure)
     script.js
     style.css
   002/
@@ -56,67 +56,67 @@ input/
     ...
 ```
 
-`input/` on projekti lähtekaust. Käsk `npm run sync` otsib sealt kõik numbrilised alamkaustad, loeb `assignment.md` faili ja lahendusfailid rekursiivselt ning uuendab brauserile sobivaid `public/data/` faile. Levinud genereeritud kaustu, näiteks `node_modules`, `.git`, `vendor`, `dist` ja `build`, ei loeta.
+`input/` is the source folder. Running `npm run sync` finds all numeric subdirectories, reads `assignment.md` and all solution files recursively, and updates `public/data/`. Common generated folders such as `node_modules`, `.git`, `vendor`, `dist` and `build` are ignored.
 
-Iga `public/data/00N/data.json` sisaldab:
+Each `public/data/00N/data.json` contains:
 
-- `assignment` — lähteülesande tekst;
-- `solutionFiles` — lahendusfailide teed ja sisu;
-- `questions` — eelgenereeritud küsimustepank.
+- `assignment` - the assignment description text
+- `solutionFiles` - file paths and contents
+- `questions` - the pre-generated question bank
 
-Sünkroonimine säilitab olemasoleva `questions` massiivi. Binaarfailid jäetakse vahele ja sellest antakse käsureal teada.
+Syncing preserves any existing `questions` array. Binary files are skipped with a warning.
 
-## Uue ülesande lisamine
+## Adding a new assignment
 
-1. Loo `input/00N/assignment.md` ja lisa samasse kausta lahendusfailid
-2. Käivita `npm run sync`
-3. Kasuta `prompts/question-generation.md` prompti koos loodud `public/data/00N/data.json` faili `assignment` ja `solutionFiles` väljadega
-4. Lisa AI vastusest saadud küsimused sama faili `questions` massiivi
+1. Create `input/00N/assignment.md` and add solution files to the same folder
+2. Run `npm run sync`
+3. Use the prompt in `prompts/question-generation.md` with the `assignment` and `solutionFiles` fields from `public/data/00N/data.json`
+4. Paste the AI output into the `questions` array in that same file
 
-Manifesti ei pea käsitsi muutma. Ülesande nimi võetakse `assignment.md` esimesest `# Pealkiri` reast.
+The manifest is updated automatically. The assignment name is taken from the first `# Heading` line in `assignment.md`.
 
-## AI küsimuste genereerimise loogika
+## AI question generation
 
-Küsimused on genereeritud AI abil, kasutades prompti, mis:
+Questions are generated with AI using a prompt that:
 
-- Palub genereerida 45 küsimust (3 igal tasemel 1–15)
-- Nõuab arusaamise kontrollimist, mitte mälu (ei küsi failinimesid)
-- Määrab igale küsimusele `hint` välja (vihje õlekõrre jaoks)
-- Nõuab `explanation` välja (kuvatakse pärast vastamist)
-- Tagab igal tasemel erineva raskusastme:
-  - Tasemed 1–5: põhimõisted ja rakenduse üldine eesmärk
-  - Tasemed 6–10: sisemine loogika, andmevoog ja valideerimine
-  - Tasemed 11–15: vigade leidmine, piirjuhtumid ja alternatiivsed lahendused
+- Requests 45 questions (3 per level 1-15)
+- Requires understanding checks, not memory (no filename questions)
+- Adds a `hint` field to each question (used by the hint lifeline)
+- Requires an `explanation` field (shown after answering)
+- Enforces three difficulty tiers:
+  - Levels 1-5: basic concepts and general purpose of the app
+  - Levels 6-10: internal logic, data flow and validation
+  - Levels 11-15: finding bugs, edge cases and alternative solutions
 
-Täielik prompt: `prompts/question-generation.md`
+Full prompt: `prompts/question-generation.md`
 
-## Mängu reeglid
+## Game rules
 
-- **15 küsimust** järjest kasvava raskusastmega
-- **Lahenduse kood** on küsimuste kõrval nähtav ja failide vahel saab liikuda
-- **4 vastusevarianti**, ainult 1 on õige
-- **Vale vastus** lõpetab mängu — tulemus langeb viimasele turvatasemele
-- **Turvatasemed:** Q5 (1 000 p) ja Q10 (32 000 p) — tagasipöördumise punktid
-- **Lahkumine** mis tahes hetkel säilitab hetke punktid
-- **Õlekõrred** (igaüht saab kasutada üks kord):
-  - **50:50** — eemaldab kaks valet vastust
-  - **Vihje** — kuvab eelgenereeritud kontseptuaalse vihje
-  - **Küsi publikult** — simuleeritud hääletusel kaldub tulemuse suunas (kergemad küsimused → suurem tõenäosus)
+- **15 questions** in increasing difficulty
+- **Solution code** is visible beside each question, with tabs for switching files
+- **4 answer options**, only 1 correct
+- **Wrong answer** ends the game and drops the score to the last safe level
+- **Safe levels:** Q5 (1 000 pts) and Q10 (32 000 pts)
+- **Quitting** at any point keeps the current score
+- **Lifelines** (each usable once):
+  - **50:50** removes two wrong options
+  - **Hint** shows a pre-generated conceptual clue
+  - **Audience** shows a simulated vote skewed toward the correct answer on easier questions
 
-## Teadaolevad piirangud
+## Known limitations
 
-- Küsimused on eelgenereeritud — nende AI abil loomine ja `questions` massiivi lisamine on käsitsi samm
-- Tulemusi ei salvestata — iga mäng algab nullist
-- Staatiline brauserirakendus ei saa serveri kaustastruktuuri otse lugeda, mistõttu tuleb pärast `input/` muutmist käivitada `npm run sync`
-- Mobiilil võib punktiredel olla kitsas (alla 880 piksli laiune paigutus muutub üheveeruliseks)
+- Questions are pre-generated; adding them to `questions` is a manual copy-paste step
+- Results are not saved between sessions
+- A static browser app cannot read the folder structure directly, so `npm run sync` must be re-run after any changes to `input/`
+- On screens narrower than 880 px the layout switches to a single column
 
-## Edasiarenduse võimalused
+## Future improvements
 
-- Tulemuste salvestamine localStorage-sse
-- Kasutajate süsteem ja edetabel
-- Automaatne küsimuste genereerimine (API võtmega)
-- Mänguajalugu
-- Ülesannete lisamine veebiliidesest
+- Real-time AI question generation via API
+- Save results to localStorage
+- User accounts and leaderboard
+- Game history
+- Add assignments through the UI
 
 ## Development process
 
@@ -151,7 +151,7 @@ Manual testing was done against the acceptance criteria of each user story:
 
 | Scenario | Expected | Result |
 |---|---|---|
-| Select assignment → start game → answer 15 correctly | Win screen, 1 000 000 pts | Pass |
+| Select assignment, start game, answer 15 correctly | Win screen, 1 000 000 pts | Pass |
 | Answer incorrectly on Q3 | Game ends, score drops to 0 (no safe level reached) | Pass |
 | Answer incorrectly on Q7 | Game ends, score drops to 1 000 (Q5 safe level) | Pass |
 | Use 50:50 | Two wrong options removed, cannot reuse lifeline | Pass |
@@ -169,10 +169,10 @@ Manual testing was done against the acceptance criteria of each user story:
 - The sync script cleanly separates source files (`input/`) from served files (`public/data/`)
 
 **What was challenging**
-- Keeping AI-generated questions at the right difficulty — some level 11–15 questions needed manual adjustment
+- Keeping AI-generated questions at the right difficulty; some level 11-15 questions needed manual adjustment
 - Designing the audience vote so it feels realistic without always being correct
 
 **What to improve next**
-- Add real-time AI question generation via API so teachers don't need a manual copy-paste step
+- Add real-time AI question generation via API so teachers do not need a manual copy-paste step
 - Save results to `localStorage` for a game history view
 - Mobile layout below 880 px needs a dedicated design pass
