@@ -190,6 +190,7 @@ function startGame(questions) {
   renderCodePanel();
   renderLadder();
   renderQuestion();
+  syncLifelineButtons();
 }
 
 function renderLadder() {
@@ -241,6 +242,7 @@ function renderQuestion() {
   });
 
   renderLadder();
+  syncLifelineButtons();
 }
 
 function selectOption(idx) {
@@ -301,7 +303,62 @@ function confirmAnswer() {
 }
 
 function useLifeline(name) {
-  // lifelines added in next iteration
+  if (!state.lifelines[name] || state.locked) return;
+  var q = state.questions[state.index];
+
+  if (name === 'fifty') {
+    var wrongIdxs = shuffle([0, 1, 2, 3].filter(function(i) { return i !== q.correctIndex; }));
+    state.removed = wrongIdxs.slice(0, 2);
+    document.querySelectorAll('#optionsList li').forEach(function(li) {
+      if (state.removed.includes(Number(li.dataset.idx))) li.classList.add('disabled');
+    });
+    state.lifelines.fifty = false;
+
+  } else if (name === 'hint') {
+    var out = document.getElementById('lifelineOutput');
+    out.classList.remove('hidden');
+    out.innerHTML = '<strong>Vihje:</strong> ' + escapeHtml(q.hint || 'Vihjet pole saadaval.');
+    state.lifelines.hint = false;
+
+  } else if (name === 'audience') {
+    var dist = audienceVote(q, state.index);
+    var out2 = document.getElementById('lifelineOutput');
+    out2.classList.remove('hidden');
+    out2.innerHTML = '<strong>Publik hääletas:</strong>' + audienceBars(dist);
+    state.lifelines.audience = false;
+  }
+
+  syncLifelineButtons();
+}
+
+function syncLifelineButtons() {
+  document.querySelectorAll('[data-lifeline]').forEach(function(btn) {
+    btn.classList.toggle('used', !state.lifelines[btn.dataset.lifeline]);
+  });
+}
+
+function audienceVote(q, level) {
+  var correctConfidence = Math.max(0.35, 0.85 - level * 0.03);
+  var dist = [0, 0, 0, 0];
+  dist[q.correctIndex] = Math.round(correctConfidence * 100);
+  var remaining = 100 - dist[q.correctIndex];
+  var others = shuffle([0, 1, 2, 3].filter(function(i) { return i !== q.correctIndex; }));
+  others.forEach(function(i, k) {
+    if (k === others.length - 1) {
+      dist[i] = remaining;
+    } else {
+      var portion = Math.round(remaining * (0.3 + Math.random() * 0.4));
+      dist[i] = portion;
+      remaining -= portion;
+    }
+  });
+  return dist;
+}
+
+function audienceBars(dist) {
+  return '<div class="audience-bars">' + dist.map(function(v, i) {
+    return '<div><span>' + 'ABCD'[i] + '</span><span class="bar"><span style="width:' + v + '%"></span></span><span>' + v + '%</span></div>';
+  }).join('') + '</div>';
 }
 
 function finishGame(opts) {
