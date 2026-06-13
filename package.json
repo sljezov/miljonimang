@@ -1,0 +1,7 @@
+{
+  "name": "miljonimang",
+  "private": true,
+  "scripts": {
+    "sync": "node scripts/sync-input.js"
+  }
+}
