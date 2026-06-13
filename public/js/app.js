@@ -62,6 +62,46 @@ function shuffle(arr) {
   return out;
 }
 
+function shuffleQuestionOptions(q) {
+  var indices = shuffle([0, 1, 2, 3]);
+  return {
+    level: q.level,
+    question: q.question,
+    options: indices.map(function(i) { return q.options[i]; }),
+    correctIndex: indices.indexOf(q.correctIndex),
+    explanation: q.explanation,
+    hint: q.hint,
+  };
+}
+
+function pickFifteen(bank, previousQuestions) {
+  var byLevel = {};
+  var previousByLevel = {};
+  (previousQuestions || []).forEach(function(q) {
+    previousByLevel[q.level] = q.question;
+  });
+
+  for (var i = 0; i < bank.length; i++) {
+    var q = bank[i];
+    if (!byLevel[q.level]) byLevel[q.level] = [];
+    byLevel[q.level].push(q);
+  }
+  var picked = [];
+  for (var level = 1; level <= 15; level++) {
+    var candidates = byLevel[level];
+    if (!candidates || candidates.length === 0) {
+      throw new Error('Küsimustepank ei sisalda küsimust tasemel ' + level);
+    }
+    var freshCandidates = candidates.filter(function(candidate) {
+      return candidate.question !== previousByLevel[level];
+    });
+    var pool = freshCandidates.length ? freshCandidates : candidates;
+    var choice = pool[Math.floor(Math.random() * pool.length)];
+    picked.push(shuffleQuestionOptions(choice));
+  }
+  return picked;
+}
+
 async function showTaskList() {
   app.innerHTML = '';
   app.appendChild(renderTemplate('taskListTemplate'));
@@ -119,13 +159,13 @@ async function showTaskDetail(taskId, taskName) {
     state.taskTitle = taskName || taskId;
 
     startBtn.addEventListener('click', function() {
-      var questions = state.questionBank.slice(0, 15);
-      if (!questions.length) {
+      try {
+        var questions = pickFifteen(state.questionBank);
+        startGame(questions);
+      } catch (err) {
         startBtn.disabled = true;
-        startBtn.textContent = 'Küsimustepank puudub';
-        return;
+        startBtn.textContent = 'Viga: ' + err.message;
       }
-      startGame(questions);
     });
   } catch (err) {
     titleEl.textContent = 'Viga teema laadimisel';
@@ -377,18 +417,41 @@ function finishGame(opts) {
   app.appendChild(renderTemplate('resultTemplate'));
 
   var heading = document.getElementById('resultHeading');
-  heading.textContent = reason === 'won'
-    ? '🏆 Miljon punkti!'
-    : reason === 'quit'
-    ? 'Lahkusid mängust'
-    : '✗ Vale vastus — mäng lõppes';
-  document.getElementById('resultMessage').textContent = reason === 'won'
-    ? 'Vastasid kõigile 15 küsimusele õigesti!'
-    : '';
+  var message = document.getElementById('resultMessage');
   document.getElementById('resultPrize').textContent = earned.toLocaleString('et-EE');
 
+  if (reason === 'won') {
+    heading.textContent = '🏆 Miljon punkti!';
+    message.textContent = 'Vastasid kõigile 15 küsimusele õigesti — sa mõistad lahendust hästi!';
+  } else if (reason === 'quit') {
+    heading.textContent = 'Lahkusid mängust';
+    message.textContent = 'Lahkusid ' + (state.index + 1) + '. küsimuse juures.';
+  } else {
+    heading.textContent = '✗ Vale vastus — mäng lõppes';
+    message.textContent = 'Tulemus langes lähimale turvatasemele.';
+  }
+
+  var review = document.getElementById('reviewList');
+  review.innerHTML = '<h3>Vastuste ülevaade</h3>';
+  state.answers.forEach(function(a, i) {
+    var div = document.createElement('div');
+    div.className = 'review-item';
+    div.innerHTML =
+      '<p class="q"><strong>' + (i + 1) + '.</strong> ' + escapeHtml(a.question) + '</p>' +
+      '<p class="a ' + (a.isCorrect ? 'correct' : 'wrong') + '">Sinu vastus: ' + escapeHtml(a.chosen) + ' ' + (a.isCorrect ? '✓' : '✗') + '</p>' +
+      (!a.isCorrect ? '<p class="a correct">Õige vastus: ' + escapeHtml(a.correct) + '</p>' : '') +
+      (a.explanation ? '<p class="muted">' + escapeHtml(a.explanation) + '</p>' : '');
+    review.appendChild(div);
+  });
+
   document.getElementById('playAgainBtn').addEventListener('click', function() {
-    startGame(state.questionBank.slice(0, 15));
+    try {
+      var previousQuestions = state.questions.slice();
+      var questions = pickFifteen(state.questionBank, previousQuestions);
+      startGame(questions);
+    } catch (err) {
+      alert('Viga küsimuste valimisel: ' + err.message);
+    }
   });
   document.getElementById('backToListBtn').addEventListener('click', showTaskList);
 }
