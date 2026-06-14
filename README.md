@@ -118,9 +118,20 @@ Full prompt: `prompts/question-generation.md`
 - Game history
 - Add assignments through the UI
 
+## Demo
+
+Main usage flow:
+
+1. Open the app. The task list loads from `public/data/manifest.json` and displays all available assignments.
+2. Click an assignment. The assignment description and solution files appear in a detail view.
+3. Click "Start game". The app picks 15 questions (one per level) from the pre-generated bank of 45, preferring questions not shown in the previous game.
+4. Answer each question by selecting one of the four options and confirming. The solution code is visible in a side panel throughout.
+5. A correct answer advances to the next question and updates the prize ladder. A wrong answer ends the game and the score drops to the last safe level (Q5: 1 000 pts, Q10: 32 000 pts). Quitting at any point keeps the current score.
+6. After the game ends or the player quits, a result screen shows the final score and a full review of all questions with correct answers and explanations.
+
 ## Development process
 
-The app was built in incremental iterations tracked via git commits:
+The app was built in incremental iterations tracked via git commits. The order was chosen to keep something runnable at each step: scaffolding and data first so the sync pipeline could be verified before any UI existed, then views from outer to inner (list before detail, detail before game), and lifelines last because they depend on a working game engine.
 
 1. Project scaffolding (package.json, .gitignore)
 2. Example assignments added to `input/`
@@ -136,6 +147,26 @@ The app was built in incremental iterations tracked via git commits:
 12. README
 
 Questions were generated using the prompt in `prompts/question-generation.md`, copied into Claude, and the JSON output was added to each `data.json` file.
+
+## Requirements: done vs. not done
+
+**Done**
+- Multiple assignments in `input/`, each in a numbered subfolder
+- Assignment list with names taken from the first heading in `assignment.md`
+- Reads `assignment.md` and all solution files for each assignment
+- 15 questions per game, 4 options each, one correct answer
+- Wrong answer ends game, score falls to last safe level
+- Quit at any time, keeping current score
+- Questions are different each game (pickFifteen rotates through the bank of 45)
+- Three lifelines: 50:50, hint, audience vote
+- Explanation shown after each answer in the result review
+- AI prompt documented in `prompts/question-generation.md`
+- Markdown rendered in the assignment description panel
+
+**Not done**
+- Real-time AI question generation via API. A static GitHub Pages app has no backend, so an API key cannot be stored securely; it would be visible in the page source. Pre-generating questions and storing them as JSON achieves the same quality without exposing credentials, without per-game latency, and without ongoing API costs. The assignment explicitly lists this as a valid approach.
+- Saving results between sessions (no localStorage persistence)
+- User accounts or leaderboard
 
 ## Definition of Done
 
@@ -155,9 +186,12 @@ Manual testing was done against the acceptance criteria of each user story:
 | Answer incorrectly on Q3 | Game ends, score drops to 0 (no safe level reached) | Pass |
 | Answer incorrectly on Q7 | Game ends, score drops to 1 000 (Q5 safe level) | Pass |
 | Use 50:50 | Two wrong options removed, cannot reuse lifeline | Pass |
+| Use 50:50 after selecting an option that gets removed | Selection is cleared and must be chosen again | Pass |
 | Use hint | Hint text shown, cannot reuse lifeline | Pass |
 | Use audience vote | Simulated poll shown, skewed toward correct answer | Pass |
-| Quit mid-game | Result shows score at current level | Pass |
+| Quit before answering the current question | Result keeps the score from the last correct answer | Pass |
+| Quit after confirming a correct answer | Result includes the newly earned prize | Pass |
+| Confirm a wrong answer | Quit is disabled, so the safe-level result cannot be bypassed | Pass |
 | Play again | Different question selected per level where possible | Pass |
 | Add new folder to `input/`, run `npm run sync` | New assignment appears in list | Pass |
 
