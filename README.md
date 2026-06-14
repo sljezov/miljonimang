@@ -1,4 +1,4 @@
-# Miljonimang
+# Miljonimäng
 
 An interactive web app that checks whether a learner understands a programming assignment solution. It works like the "Who Wants to Be a Millionaire" game show: 15 multiple-choice questions, and one wrong answer ends the game.
 
@@ -96,7 +96,7 @@ Full prompt: `prompts/question-generation.md`
 - **Solution code** is visible beside each question, with tabs for switching files
 - **4 answer options**, only 1 correct
 - **Wrong answer** ends the game and drops the score to the last safe level
-- **Safe levels:** Q5 (1 000 pts) and Q10 (32 000 pts)
+- **Safe levels:** Q5 (1 000 pts), Q10 (32 000 pts), Q15 (1 000 000 pts, the win)
 - **Quitting** at any point keeps the current score
 - **Lifelines** (each usable once):
   - **50:50** removes two wrong options
@@ -123,7 +123,7 @@ Full prompt: `prompts/question-generation.md`
 Main usage flow:
 
 1. Open the app. The task list loads from `public/data/manifest.json` and displays all available assignments.
-2. Click an assignment. The assignment description and solution files appear in a detail view.
+2. Click an assignment. The assignment description (rendered from `assignment.md`) and a list of solution files appear in a detail view.
 3. Click "Start game". The app picks 15 questions (one per level) from the pre-generated bank of 45, preferring questions not shown in the previous game.
 4. Answer each question by selecting one of the four options and confirming. The solution code is visible in a side panel throughout.
 5. A correct answer advances to the next question and updates the prize ladder. A wrong answer ends the game and the score drops to the last safe level (Q5: 1 000 pts, Q10: 32 000 pts). Quitting at any point keeps the current score.

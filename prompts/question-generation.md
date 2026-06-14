@@ -5,10 +5,10 @@ See fail dokumenteerib, kuidas genereeriti mängus kasutatavad küsimused.
 ## Kuidas küsimusi genereerida (uue ülesande lisamisel)
 
 1. Koosta `input/00N/assignment.md` ja lahenduse failid
-2. Kopeeri allolev süsteemiprompt ja kasutajaprompt mõnda AI-chatti (Claude, ChatGPT vms)
-3. Asenda muutujad ({{...}}) tegeliku sisuga
-4. Kopeeri vastus JSON-failina `public/data/00N/data.json`
-5. Uuenda `public/data/manifest.json`
+2. Käivita `npm run sync` -- see loob `public/data/00N/data.json` ja uuendab `manifest.json` automaatselt
+3. Kopeeri allolev süsteemiprompt ja kasutajaprompt mõnda AI-chatti (Claude, ChatGPT vms)
+4. Asenda muutujad ({{...}}) tegeliku sisuga
+5. Kopeeri vastuse JSON `public/data/00N/data.json` faili `questions` massiivi
 
 ---
 

@@ -62,6 +62,20 @@ function shuffle(arr) {
   return out;
 }
 
+function completedCorrectAnswers() {
+  var count = 0;
+  for (var i = 0; i < state.answers.length; i++) {
+    if (!state.answers[i].isCorrect) break;
+    count += 1;
+  }
+  return count;
+}
+
+function currentScore() {
+  var completed = completedCorrectAnswers();
+  return completed > 0 ? PRIZES[completed - 1] : 0;
+}
+
 function shuffleQuestionOptions(q) {
   var indices = shuffle([0, 1, 2, 3]);
   return {
@@ -149,6 +163,8 @@ async function showTaskDetail(taskId, taskName) {
     if (!res.ok) throw new Error('data.json ei leitud (' + res.status + ')');
     var data = await res.json();
     var solutionFiles = data.solutionFiles || [];
+
+    document.getElementById('taskAssignment').innerHTML = renderMarkdown(data.assignment || '');
 
     filesEl.textContent = solutionFiles.length
       ? 'Lahendus sisaldab faile: ' + solutionFiles.map(function(file) { return file.path; }).join(', ')
@@ -328,6 +344,7 @@ function confirmAnswer() {
 
   if (!correct) {
     confirmBtn.textContent = 'Vaata tulemust';
+    document.getElementById('quitBtn').disabled = true;
   } else if (isLastCorrect) {
     confirmBtn.textContent = 'Vaata võitu 🏆';
   } else {
@@ -350,8 +367,15 @@ function useLifeline(name) {
     var wrongIdxs = shuffle([0, 1, 2, 3].filter(function(i) { return i !== q.correctIndex; }));
     state.removed = wrongIdxs.slice(0, 2);
     document.querySelectorAll('#optionsList li').forEach(function(li) {
-      if (state.removed.includes(Number(li.dataset.idx))) li.classList.add('disabled');
+      if (state.removed.includes(Number(li.dataset.idx))) {
+        li.classList.add('disabled');
+        li.classList.remove('selected');
+      }
     });
+    if (state.removed.includes(state.selected)) {
+      state.selected = null;
+      document.getElementById('confirmBtn').disabled = true;
+    }
     state.lifelines.fifty = false;
 
   } else if (name === 'hint') {
@@ -373,7 +397,9 @@ function useLifeline(name) {
 
 function syncLifelineButtons() {
   document.querySelectorAll('[data-lifeline]').forEach(function(btn) {
-    btn.classList.toggle('used', !state.lifelines[btn.dataset.lifeline]);
+    var used = !state.lifelines[btn.dataset.lifeline];
+    btn.classList.toggle('used', used);
+    btn.disabled = used;
   });
 }
 
@@ -407,7 +433,7 @@ function finishGame(opts) {
   if (reason === 'won') {
     earned = PRIZES[PRIZES.length - 1];
   } else if (reason === 'quit') {
-    earned = state.index === 0 ? 0 : PRIZES[state.index - 1];
+    earned = currentScore();
   } else {
     var lastSafe = SAFE_LEVELS.filter(function(s) { return s <= state.index; }).pop();
     earned = lastSafe ? PRIZES[lastSafe - 1] : 0;
